@@ -52,6 +52,7 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     
         
 if __name__ == '__main__':
+    np.random.seed(42)
     grid_size = 100
     initial_cond = np.zeros([grid_size, grid_size])
     initial_cond[-2, grid_size//2] = 1
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     
     g, c = dla_growth(eta, omega, initial_cond, growth_steps=1000)
         
-    plot_grid(g[-1])
+    plot_grid(c[-1], g[-1])
         
         
     
