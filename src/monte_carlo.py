@@ -4,10 +4,20 @@ import matplotlib.pyplot as plt
 import random
 
 from numba import njit
+from enum import IntEnum
 from matplotlib.animation import FuncAnimation
 
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+
+class EnumCellTypes(IntEnum):
+    EMPTY_WHITE = 0
+    GROWTH_BLACK = 1
+    WALK_PATH_GREY = 2
+    WALK_FAIL_ORANGE = 3
+    WALK_BOUNDARY_RED = 4
+    NEW_GROWTH_GREEN = 5
+    WALK_START_BLUE = 6
 
 def initialize_grid(grid_size):
     """
@@ -25,7 +35,7 @@ def initialize_grid(grid_size):
     """
     seed_growth_grid = np.zeros((grid_size, grid_size), dtype=int)
     center = grid_size // 2
-    seed_growth_grid[grid_size - 1, center] = 1
+    seed_growth_grid[grid_size - 1, center] = EnumCellTypes.GROWTH_BLACK
     
     return seed_growth_grid
 
@@ -75,10 +85,10 @@ def random_walk(x, y, grid_size, seed_growth_grid):
         # Checks possible x and y values for the next step
         possible_x, possible_y = (x + x_direction) % grid_size, y + y_direction
 
-        if (0 <= possible_y):
+        if possible_y >= grid_size:
             available_directions.append((x_direction, y_direction))
-            
-        elif (0 <= possible_y < grid_size # Check if the y value is within the grid
+
+        if (0 <= possible_y < grid_size # Check if the y value is within the grid
             and not seed_growth_grid[possible_y, possible_x]): # Check if the next step is not an active growth site
 
             available_directions.append((x_direction, y_direction))
@@ -120,11 +130,11 @@ def stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
         new_x = (x + x_direction) % grid_size
         new_y = y + y_direction
 
-        if (0 <= new_y < seed_growth_grid.shape[0] # Check if the y value is within the grid
+        if (0 <= new_y < grid_size # Check if the y value is within the grid
             and seed_growth_grid[new_y, new_x]): # Check if the next step is an active growth site
 
             if np.random.random() < sticking_prob:
-                seed_growth_grid[y, x] = 1
+                seed_growth_grid[y, x] = EnumCellTypes.GROWTH_BLACK
                 return True
     
     return False
@@ -151,9 +161,13 @@ def monte_carlo_sim(grid_size, num_walkers, sticking_prob):
         The final seed growth grid.
     """
     seed_growth_grid = initialize_grid(grid_size)
+    stuck_positions = []
+    growth_over_time = []
+    mean_free_paths = []
 
     for _ in range(num_walkers):
         x, y = initialize_walker(grid_size)
+        path_length = 0
 
         while True:
             x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
@@ -165,11 +179,15 @@ def monte_carlo_sim(grid_size, num_walkers, sticking_prob):
                 break
 
             x, y = x_new, y_new
+            path_length += 1
 
             if stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
+                stuck_positions.append((x, y))
+                growth_over_time.append(np.sum(seed_growth_grid))
+                mean_free_paths.append(path_length)
                 break
 
-    return seed_growth_grid
+    return seed_growth_grid, stuck_positions, growth_over_time, mean_free_paths
 
 def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_speed=500):
     """
@@ -195,6 +213,9 @@ def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_spe
         The final seed growth grid.
     """
     seed_growth_grid = initialize_grid(grid_size)
+    stuck_positions = []
+    growth_over_time = []
+    mean_free_paths = []
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.axis("off")
@@ -205,35 +226,43 @@ def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_spe
 
     def update(frame):
         nonlocal seed_growth_grid
+        nonlocal stuck_positions
+        nonlocal growth_over_time
+        nonlocal mean_free_paths
 
         grid_copy = seed_growth_grid.copy()
 
         x, y = initialize_walker(grid_size)
 
+        path_length = 0
+
         starting_x = x
         starting_y = y
-
-        grid_copy[starting_y, starting_x] = 6
 
         while True:
             x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
 
             if x_new == x and y_new == y:
-                grid_copy[y_new, x_new] = 3
+                grid_copy[y_new, x_new] = EnumCellTypes.WALK_FAIL_ORANGE
                 break
 
             if y_new >= grid_size:
-                grid_copy[y, x] = 4
+                grid_copy[y, x] = EnumCellTypes.WALK_BOUNDARY_RED
                 break
 
             x, y = x_new, y_new
+            path_length += 1
 
             if stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
-                grid_copy[y_new, x_new] = 5
+                grid_copy[y_new, x_new] = EnumCellTypes.NEW_GROWTH_GREEN
+                stuck_positions.append((x, y))
+                growth_over_time.append(np.sum(seed_growth_grid))
+                mean_free_paths.append(path_length)
                 break
 
-            grid_copy[y_new, x_new] = 2
-            grid_copy[starting_y, starting_x] = 6
+            grid_copy[y_new, x_new] = EnumCellTypes.WALK_PATH_GREY
+        
+        grid_copy[starting_y, starting_x] = EnumCellTypes.WALK_START_BLUE
 
         img.set_array(grid_copy)
 
@@ -242,7 +271,7 @@ def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_spe
     ani = FuncAnimation(fig, update, frames=num_walkers, repeat=False, interval=animation_speed)
     plt.show()
 
-    return seed_growth_grid
+    return seed_growth_grid, stuck_positions, growth_over_time, mean_free_paths
 
 def plot_monte_carlo(grid, save_plot, filename):
     """
