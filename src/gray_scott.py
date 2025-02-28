@@ -3,18 +3,29 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-x_length = 100
-y_length = 100
-n_steps = 50
-total_time = 1000
-time_step_size = 0.1
-diffusion_coefficient_u =  0.16
-diffusion_coefficient_v =  0.08
-U_supply = 0.035
-k = 0.060
-V_decay = U_supply + k
-
 def init_grids(total_time, time_step_size, n_steps):
+    """
+    Initiallizes two grids, one for chemical U and one for chemical V, both have identical size. 
+    As a initial condition, U grid is set to 0.5 everywhere, V grid has a small square equal to 0.25 in the middle. 
+    Boundry conditions are implemented in the grid. 
+
+    Parameters
+    ----------
+    total_time : int
+        Total time of the simulation.
+    time_step_size : int
+        The size of time step size.
+    n_steps : int
+        The size of the grid. 
+    
+    Returns
+    -------
+    chemical_U : np.ndarray
+        The grid for U chemical, with implemented initial conditions and boundry conditions. 
+    
+    chemical_V : np.ndarray
+        The grid for V chemical, with implemented initial conditions and boundry conditions.
+    """
     # Step size
     time_step_num = int(total_time/time_step_size)
     
@@ -38,7 +49,36 @@ def init_grids(total_time, time_step_size, n_steps):
     return chemical_U, chemical_V
 
     
-def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size):
+def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_length, n_steps, diffusion_coefficient_u, diffusion_coefficient_v, U_supply, k):
+    """
+    Simulates gray_scott model in two dimensions.  
+
+    Parameters
+    ----------
+    chemical_U : np.ndarray
+        The grid for U chemical, with implemented initial conditions and boundry conditions. 
+    chemical_V : np.ndarray
+        The grid for V chemical, with implemented initial conditions and boundry conditions.
+    total_time : int
+        Total time of the simulation.
+    time_step_size : int
+        The size of time step size.
+    x_length : int
+        The max value of X. 
+    n_steps : int
+        The size of the grid. 
+    diffusion_coefficient_u: int
+        Diffusion coefficient for chemical U. 
+    diffusion_coefficient_v: int 
+        Diffusion coefficient for chemical V. 
+    U_supply : int
+        The rate at which U is supplied. 
+    k : int 
+        k parameter. The sum (f + k) controls the rate at which chemical V decays.
+    Returns
+    -------
+    None
+    """
     # Solve 
     x_step_size = x_length/n_steps
     time_step_num = int(total_time/time_step_size)
@@ -78,7 +118,7 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size):
 
                     reaction_component_V = (
                     chemical_U[time, rows, columns]*chemical_V[time, rows, columns]**2 
-                    - (V_decay)* (chemical_V[time, rows, columns])
+                    - (U_supply + k)* (chemical_V[time, rows, columns])
                     )
 
                     chemical_V_new[rows, columns] += time_step_size*(difussion_component_V + reaction_component_V)
@@ -94,13 +134,22 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size):
             chemical_V[time + 1,-1, :] = 0.0
 
 
-def plot_animation(c, g = None, frame_steps=1):
+def plot_animation(c):
+    """
+    Plots animation for gray scott simulation.   
+
+    Parameters
+    ----------
+    c : np.ndarray
+        The final gray scott concentration grid.
+    -------
+    None
+    """
+    frame_steps=1
     num_steps = c.shape[0]
     print(num_steps)
     fig, ax = plt.subplots()
     heatmap = ax.imshow(c[0], cmap="hot", extent=[0, 1, 0, 1])
-    if g is not None:
-        growthmap = ax.imshow(g[0], alpha=g[0], cmap='tab20b',  extent=[0, 1, 0, 1])
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_title("Equilibrium Diffusion")
@@ -110,9 +159,6 @@ def plot_animation(c, g = None, frame_steps=1):
 
     def update(frame):
         heatmap.set_array(c[frame]) 
-        if g is not None:
-            growthmap.set_array(g[frame])
-            growthmap.set_alpha(g[frame])
         ax.set_title(f"Equilibrium Diffusion (frame = {frame})")
         return heatmap,
 
