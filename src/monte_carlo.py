@@ -85,10 +85,10 @@ def random_walk(x, y, grid_size, seed_growth_grid):
         # Checks possible x and y values for the next step
         possible_x, possible_y = (x + x_direction) % grid_size, y + y_direction
 
-        if possible_y >= grid_size:
+        if (possible_y >= grid_size or possible_y < 0):
             available_directions.append((x_direction, y_direction))
 
-        if (0 <= possible_y < grid_size # Check if the y value is within the grid
+        elif (0 <= possible_y < grid_size # Check if the y value is within the grid
             and not seed_growth_grid[possible_y, possible_x]): # Check if the next step is not an active growth site
 
             available_directions.append((x_direction, y_direction))
@@ -139,7 +139,70 @@ def stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
     
     return False
 
-def monte_carlo_sim(grid_size, num_walkers, sticking_prob):
+def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob, 
+                            stuck_positions, growth_over_time, mean_free_paths):
+    """
+    Simulates a single walker moving randomly until it sticks to the seed growth, 
+    or reaches the bottom/top row, or the walker fails to move.
+
+    Parameters
+    ----------
+    seed_growth_grid : np.ndarray
+        The seed growth grid.
+    grid_size : int
+        The size of the grid.
+    sticking_prob : float
+        The probability of the walker sticking to the seed growth.
+    stuck_positions : list
+        The positions where the walkers stuck.
+    growth_over_time : list
+        The growth of the seed over time.
+    mean_free_paths : list
+        The mean free paths of the walkers.
+    
+    Returns
+    -------
+    grid_copy : np.ndarray
+        Full Growth grid with random walker path.
+    """
+    grid_copy = seed_growth_grid.copy()
+
+    x, y = initialize_walker(grid_size)
+
+    path_length = 0
+
+
+    starting_x = x
+    starting_y = y
+
+    while True:
+        x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
+
+        if x_new == x and y_new == y:
+            grid_copy[y_new, x_new] = EnumCellTypes.WALK_FAIL_ORANGE
+            break
+
+        if y_new >= grid_size or y_new < 0:
+            grid_copy[y, x] = EnumCellTypes.WALK_BOUNDARY_RED
+            break
+
+        x, y = x_new, y_new
+        path_length += 1
+
+        if stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
+            grid_copy[y_new, x_new] = EnumCellTypes.NEW_GROWTH_GREEN
+            stuck_positions.append((x, y))
+            growth_over_time.append(np.sum(seed_growth_grid))
+            mean_free_paths.append(path_length)
+            break
+
+        grid_copy[y_new, x_new] = EnumCellTypes.WALK_PATH_GREY
+    
+    grid_copy[starting_y, starting_x] = EnumCellTypes.WALK_START_BLUE
+
+    return grid_copy
+
+def monte_carlo_sim(grid_size, sticking_prob):
     """
     Simulates the growth of a seed crystal using a Monte Carlo random walk method.
     Seed starts at the center of the bottom row.
@@ -165,31 +228,24 @@ def monte_carlo_sim(grid_size, num_walkers, sticking_prob):
     growth_over_time = []
     mean_free_paths = []
 
-    for _ in range(num_walkers):
-        x, y = initialize_walker(grid_size)
-        path_length = 0
+    walk_count = 0
 
-        while True:
-            x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
+    while True:
+        walk_count += 1
+        monte_carlo_single_walk(seed_growth_grid, 
+                                grid_size, 
+                                sticking_prob, 
+                                stuck_positions, 
+                                growth_over_time, 
+                                mean_free_paths)
+        
+        if np.any(seed_growth_grid[0]):
+            print("Seed growth has reached the top row after {} walkers.".format(walk_count))
+            break
 
-            if x_new == x and y_new == y:
-                break
+    return seed_growth_grid, stuck_positions, growth_over_time, mean_free_paths, walk_count
 
-            if y_new >= grid_size:
-                break
-
-            x, y = x_new, y_new
-            path_length += 1
-
-            if stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
-                stuck_positions.append((x, y))
-                growth_over_time.append(np.sum(seed_growth_grid))
-                mean_free_paths.append(path_length)
-                break
-
-    return seed_growth_grid, stuck_positions, growth_over_time, mean_free_paths
-
-def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_speed=500):
+def animate_monte_carlo_sim(grid_size, sticking_prob, animation_speed=500):
     """
     Animates the growth of a seed crystal using a Monte Carlo random walk method.
     Seed starts at the center of the bottom row.
@@ -212,10 +268,14 @@ def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_spe
     seed_growth_grid : np.ndarray
         The final seed growth grid.
     """
+    num_walkers = 500000
+    
     seed_growth_grid = initialize_grid(grid_size)
     stuck_positions = []
     growth_over_time = []
     mean_free_paths = []
+
+    walk_count = 0
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.axis("off")
@@ -229,49 +289,29 @@ def animate_monte_carlo_sim(grid_size, num_walkers, sticking_prob, animation_spe
         nonlocal stuck_positions
         nonlocal growth_over_time
         nonlocal mean_free_paths
+        nonlocal walk_count
 
-        grid_copy = seed_growth_grid.copy()
+        walk_count += 1
 
-        x, y = initialize_walker(grid_size)
-
-        path_length = 0
-
-        starting_x = x
-        starting_y = y
-
-        while True:
-            x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
-
-            if x_new == x and y_new == y:
-                grid_copy[y_new, x_new] = EnumCellTypes.WALK_FAIL_ORANGE
-                break
-
-            if y_new >= grid_size:
-                grid_copy[y, x] = EnumCellTypes.WALK_BOUNDARY_RED
-                break
-
-            x, y = x_new, y_new
-            path_length += 1
-
-            if stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
-                grid_copy[y_new, x_new] = EnumCellTypes.NEW_GROWTH_GREEN
-                stuck_positions.append((x, y))
-                growth_over_time.append(np.sum(seed_growth_grid))
-                mean_free_paths.append(path_length)
-                break
-
-            grid_copy[y_new, x_new] = EnumCellTypes.WALK_PATH_GREY
-        
-        grid_copy[starting_y, starting_x] = EnumCellTypes.WALK_START_BLUE
+        grid_copy = monte_carlo_single_walk(seed_growth_grid, 
+                                            grid_size, 
+                                            sticking_prob, 
+                                            stuck_positions, 
+                                            growth_over_time, 
+                                            mean_free_paths)
 
         img.set_array(grid_copy)
+
+        if np.any(seed_growth_grid[0]):
+            ani.event_source.stop()
+            print("Seed growth has reached the top row after {} walkers.".format(walk_count))
 
         return [img]
 
     ani = FuncAnimation(fig, update, frames=num_walkers, repeat=False, interval=animation_speed)
     plt.show()
 
-    return seed_growth_grid, stuck_positions, growth_over_time, mean_free_paths
+    return seed_growth_grid, stuck_positions, growth_over_time, mean_free_paths, walk_count
 
 def plot_monte_carlo(grid, save_plot, filename):
     """
