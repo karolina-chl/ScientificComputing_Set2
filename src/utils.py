@@ -21,10 +21,12 @@ def plot_grid(c, growth=None):
     
     
 
-def plot_animation(grids, frame_steps=1):
-    num_steps = grids.shape[0]
+def plot_animation(c, g = None, frame_steps=1):
+    num_steps = c.shape[0]
     fig, ax = plt.subplots()
-    heatmap = ax.imshow(grids, cmap="hot", extent=[0, 1, 0, 1])
+    heatmap = ax.imshow(c[0], cmap="hot", extent=[0, 1, 0, 1])
+    if g is not None:
+        growthmap = ax.imshow(g[0], alpha=g[0], cmap='tab20b',  extent=[0, 1, 0, 1])
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_title("Equilibrium Diffusion")
@@ -33,7 +35,10 @@ def plot_animation(grids, frame_steps=1):
     cbar.set_label("Concentration")
 
     def update(frame):
-        heatmap.set_array(grids[frame]) 
+        heatmap.set_array(c[frame]) 
+        if g is not None:
+            growthmap.set_array(g[frame])
+            growthmap.set_alpha(g[frame])
         ax.set_title(f"Equilibrium Diffusion (frame = {frame})")
         return heatmap,
 
