@@ -43,18 +43,27 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     c[0], _,_ = SOR_top_down(c[0], omega, tolerance=diffusion_tolerance, mask=1-g[0])
     for t in range(0, growth_steps-1):
         
+        if(t%(growth_steps//100)==0):
+            print('.', end='', flush=True)
+        
         
         c[t+1], _,_ = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t])
         
         g[t+1] = g[t]
-        p_g = neighbors * c[t+1]**eta
+        p_g = neighbors * np.maximum(1e-9, c[t+1])**eta
+        # p_g[np.isnan(p_g)]=0
+        # print(p_g)
+        print(t, np.sum(p_g), np.max(p_g))
         p_g = p_g / np.sum(p_g)
         
         # plot_grid(c[t])
         
-        grow_g(g[t+1], p_g, neighbors)
-        
-        plot_grid(neighbors)
+        reached_top = grow_g(g[t+1], p_g, neighbors)
+        if reached_top:
+            break
+        # plot_grid(neighbors)
+    print('.')
+    
     return g, c
         
     
@@ -65,13 +74,13 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
 #         f_p = f(center + dx)
         
 if __name__ == '__main__':
-    np.random.seed(420)
-    grid_size = 100
+    np.random.seed(42)
+    grid_size = 50
     initial_cond = np.zeros([grid_size, grid_size])
     initial_cond[-2, grid_size//2] = 1
     # plot_grid(initial_cond)
                     
-    eta =1
+    eta =0.5
     omega = 1.87
     
     g, c = dla_growth(eta, omega, initial_cond, growth_steps=1000)
