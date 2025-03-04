@@ -52,7 +52,11 @@ def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None):
                     assert False, 'SOR became unstable, please try a lower omega'
 
         if tolerance is not None:
+            eps_prev = eps
             eps = np.max(np.abs(c - c_old))
+            if eps > eps_prev:
+                omega = omega-0.05
+                # print('reduced omega to ', omega)
             if eps < tolerance:
                 break
         c, c_old = c_old, c
