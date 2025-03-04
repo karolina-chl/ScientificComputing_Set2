@@ -2,22 +2,32 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
-def plot_grid(c, growth=None, file=None, title=''):
+def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=None ):
+    
+    # plt.tight_layout()
+    
+    
     grid_size = c.shape[-1]
-    fig, ax = plt.subplots()
+    return_ax = True
+    if fig is None:
+        fig, ax = plt.subplots()
+        return_ax=False
     heatmap = ax.imshow(c, cmap="hot", extent=[0, 1, 0, 1])
-    cbar = plt.colorbar(heatmap)
-    cbar.set_label("Concentration")
+    if make_cbar:
+        cbar = plt.colorbar(heatmap)
+        cbar.set_label("Concentration")
     if growth is not None:      
         heatmap = ax.imshow(growth, alpha=growth, cmap='tab20b',  extent=[0, 1, 0, 1])
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_title(title)
 
+    
     if file is not None:
         plt.savefig(file, dpi=600)
 
-    
+    if return_ax:
+        return fig, ax
     plt.show()
     
     

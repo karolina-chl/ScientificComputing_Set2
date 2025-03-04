@@ -83,9 +83,9 @@ if __name__ == '__main__':
     eta =2
     omega = 1.85
     
-    g, c , num_iter, total_sor_iter= dla_growth(eta, omega, initial_cond, growth_steps=1000)
+    g, c , num_iter, total_sor_iter= dla_growth(eta, omega, initial_cond, growth_steps=10000)
         
-    # plot_grid(c[-1], g[-1])
+    plot_grid(c[num_iter-1], g[num_iter-1], file='../plots/run_with_eta_{}.png'.format(eta), title=r'$\eta={}$'.format(eta), make_cbar=True)
     print(total_sor_iter)
     
 
