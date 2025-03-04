@@ -74,7 +74,7 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_lengt
     U_supply : int
         The rate at which U is supplied. 
     k : int 
-        k parameter. The sum (f + k) controls the rate at which chemical V decays.
+        k parameter. The sum (f + k) controls the rate at which chemical V decays. 
     Returns
     -------
     None
@@ -109,7 +109,7 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_lengt
                     
                     chemical_U_new[rows, columns] += time_step_size*(difussion_component_U + reaction_component_U)
 
-                    #changes in chamical V 
+                    #changes in chemical V 
                     difussion_component_V = ((diffusion_coefficient_v/(x_step_size**2))*(
                     chemical_V[time, rows + 1, columns] + chemical_V[time, rows -1, columns]
                     + chemical_V[time, rows, (columns + 1)%n_steps] + chemical_V[time, rows, (columns -1)%n_steps] 
@@ -147,7 +147,6 @@ def plot_animation(c):
     """
     frame_steps=1
     num_steps = c.shape[0]
-    print(num_steps)
     fig, ax = plt.subplots()
     heatmap = ax.imshow(c[0], cmap="hot", extent=[0, 1, 0, 1])
     ax.set_xlabel("X")
@@ -162,6 +161,44 @@ def plot_animation(c):
         ax.set_title(f"Equilibrium Diffusion (frame = {frame})")
         return heatmap,
 
-    animation.FuncAnimation(fig, update, frames=range(0, num_steps, frame_steps ), interval=1, blit=False)
+    anim = animation.FuncAnimation(fig, update, frames=range(0, num_steps, frame_steps ), interval=1, blit=False)
     plt.show()
+
+    return anim
+
+
+def last_frame_gray_scott(c, filename):
+    """
+    Returns and saves the last frame of the Gray-Scott simulation in high quality.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        The final Gray-Scott concentration grid.
+    filename : str, optional
+        The name of the output image file.
+    dpi : int, optional
+        Dots per inch for high-resolution output.
+
+    Returns
+    -------
+    np.ndarray
+        The last frame of the simulation.
+    """
+    last_frame = c[-1]  # Get the last time step
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(last_frame, cmap="hot", extent=[0, 1, 0, 1])
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+
+    cbar = plt.colorbar(im)
+    cbar.set_label("Concentration")
+    plt.savefig(filename, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+
+
+
 
