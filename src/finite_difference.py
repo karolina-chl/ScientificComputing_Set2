@@ -38,13 +38,18 @@ def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None):
         for i in range(1, height -1):
             c[i, -1] = c_old[i, -1] # to avoid adding sink on left side
             for j in range(width):
+                if mask[i,j] ==0:
+                    c[i,j] = 0
+                    continue
                 c0 = c_old[i, j]
                 c1 = c_old[i+1, j]
                 c2 = c[i-1, j]
                 c3 = c[i, (j-1)% width] 
                 c4 = c_old[i, (j+1)% width ]
-                c[i, j] = mask[i,j] * (omega / 4.0 * (c1 + c2 + c3+ c4)
-                    + (1-omega) * c0 )
+                c[i, j] = omega / 4.0 * (c1 + c2 + c3+ c4) + (1-omega) * c0 
+                if np.isnan(c[i,j]):
+                    print(t, i,j)
+                    assert False, 'SOR became unstable, please try a lower omega'
 
         if tolerance is not None:
             eps = np.max(np.abs(c - c_old))
