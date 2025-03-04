@@ -44,7 +44,8 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     g = np.zeros_like(c)
     g[0] = initial_condition
     neighbors = neighbors_grid(g[0])
-    c[0], _,_ = SOR_top_down(c[0], omega, tolerance=diffusion_tolerance, mask=1-g[0])
+    c[0], sor_iter,_ = SOR_top_down(c[0], omega, tolerance=diffusion_tolerance, mask=1-g[0])
+    total_sor_iter = sor_iter
     for t in range(0, growth_steps-1):
         
         if(t%(growth_steps//100)==0):
@@ -52,12 +53,12 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
         
         
         c[t+1], sor_iter, sor_tol = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t])
+        total_sor_iter += sor_iter
         # with high omega we sometimes see negative / very small concentrations
         c[t+1][c[t+1] < diffusion_tolerance] = 0
         
         g[t+1] = g[t]
-        p_g = neighbors *  c[t+1]**eta
-            
+        p_g = neighbors *  c[t+1]**eta            
         p_g = p_g / np.sum(p_g)
         
         # plot_grid(c[t])
@@ -68,7 +69,7 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
         # plot_grid(neighbors)
     print('.')
     
-    return g, c, t
+    return g, c, t, total_sor_iter
 
 
 if __name__ == '__main__':
@@ -79,12 +80,13 @@ if __name__ == '__main__':
     initial_cond[-2, grid_size//2] = 1
     # plot_grid(initial_cond)
                     
-    eta =0.1
-    omega = 1.95
+    eta =2
+    omega = 1.85
     
-    g, c , num_iter= dla_growth(eta, omega, initial_cond, growth_steps=1000)
+    g, c , num_iter, total_sor_iter= dla_growth(eta, omega, initial_cond, growth_steps=1000)
         
     # plot_grid(c[-1], g[-1])
+    print(total_sor_iter)
     
 
     plot_animation(c[:num_iter], g[:num_iter])

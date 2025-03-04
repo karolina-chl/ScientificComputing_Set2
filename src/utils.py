@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
-def plot_grid(c, growth=None):
+def plot_grid(c, growth=None, file=None, title=''):
     grid_size = c.shape[-1]
     fig, ax = plt.subplots()
     heatmap = ax.imshow(c, cmap="hot", extent=[0, 1, 0, 1])
@@ -12,9 +12,10 @@ def plot_grid(c, growth=None):
         heatmap = ax.imshow(growth, alpha=growth, cmap='tab20b',  extent=[0, 1, 0, 1])
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
-    ax.set_title("Equilibrium Diffusion")
+    ax.set_title(title)
 
-
+    if file is not None:
+        plt.savefig(file, dpi=600)
 
     
     plt.show()
