@@ -12,6 +12,9 @@ def neighbors_grid(g):
     neighbors_grid = (top+down+left+right) > 0
     return np.maximum(0, neighbors_grid - g)
 
+@njit
+def set_numba_seed(seed):
+    np.random.seed(seed)
 
 @njit
 def grow_g(g, p_g, neighbors):    
@@ -30,7 +33,8 @@ def grow_g(g, p_g, neighbors):
                 for dy, dx in neighbor_coords:
                     if 0<= i+dy < grid_size:
                         neighbors[i+dy, (j+dx) % grid_size] = 1 - g[i+dy, (j+dx) % grid_size]
-                return
+                return i==0
+    assert(False)
 
 
 def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_tolerance=1e-9):
@@ -47,13 +51,13 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
             print('.', end='', flush=True)
         
         
-        c[t+1], _,_ = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t])
+        c[t+1], sor_iter, sor_tol = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t])
+        # with high omega we sometimes see negative / very small concentrations
+        c[t+1][c[t+1] < diffusion_tolerance] = 0
         
         g[t+1] = g[t]
-        p_g = neighbors * np.maximum(1e-9, c[t+1])**eta
-        # p_g[np.isnan(p_g)]=0
-        # print(p_g)
-        print(t, np.sum(p_g), np.max(p_g))
+        p_g = neighbors *  c[t+1]**eta
+            
         p_g = p_g / np.sum(p_g)
         
         # plot_grid(c[t])
@@ -64,29 +68,26 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
         # plot_grid(neighbors)
     print('.')
     
-    return g, c
-        
-    
-# def interval_bisection_omega(f, xlim=[0,2], tol=1e-3):
-#     while xlim[1] - xlim[0] > tol:
-#         dx
-#         center = (xlim[1] + xlim[0]) /2
-#         f_p = f(center + dx)
-        
+    return g, c, t
+
+
 if __name__ == '__main__':
     np.random.seed(42)
-    grid_size = 50
+    set_numba_seed(np.random.randint(1000000000))
+    grid_size = 100
     initial_cond = np.zeros([grid_size, grid_size])
     initial_cond[-2, grid_size//2] = 1
     # plot_grid(initial_cond)
                     
-    eta =0.5
-    omega = 1.87
+    eta =0.1
+    omega = 1.95
     
-    g, c = dla_growth(eta, omega, initial_cond, growth_steps=1000)
+    g, c , num_iter= dla_growth(eta, omega, initial_cond, growth_steps=1000)
         
     # plot_grid(c[-1], g[-1])
-    plot_animation(c, g)
+    
+
+    plot_animation(c[:num_iter], g[:num_iter])
         
         
     
