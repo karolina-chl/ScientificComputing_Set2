@@ -6,7 +6,6 @@ from numba import njit
 from enum import IntEnum
 from matplotlib.animation import FuncAnimation
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
 class EnumCellTypes(IntEnum):
     EMPTY_WHITE = 0
@@ -17,7 +16,6 @@ class EnumCellTypes(IntEnum):
     NEW_GROWTH_GREEN = 5
     WALK_START_BLUE = 6
 
-@njit
 @njit
 def initialize_grid(grid_size):
     """
@@ -34,14 +32,11 @@ def initialize_grid(grid_size):
         The initialized grid.
     """
     seed_growth_grid = np.zeros((grid_size, grid_size), dtype=np.int8)
-    seed_growth_grid = np.zeros((grid_size, grid_size), dtype=np.int8)
     center = grid_size // 2
-    seed_growth_grid[grid_size - 1, center] = 1 # EnumCellTypes.GROWTH_BLACK
     seed_growth_grid[grid_size - 1, center] = 1 # EnumCellTypes.GROWTH_BLACK
     
     return seed_growth_grid
 
-@njit
 @njit
 def initialize_walker(grid_size):
     """
@@ -61,7 +56,6 @@ def initialize_walker(grid_size):
     """
     return np.random.randint(0, grid_size), 0
 
-@njit
 @njit
 def random_walk(x, y, grid_size, seed_growth_grid):
     """
@@ -86,7 +80,6 @@ def random_walk(x, y, grid_size, seed_growth_grid):
         The new y position of the walker.
     """
     DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-    DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
     available_directions = []
 
     for x_direction, y_direction in DIRECTIONS:
@@ -94,12 +87,8 @@ def random_walk(x, y, grid_size, seed_growth_grid):
         possible_x, possible_y = (x + x_direction) % grid_size, y + y_direction
 
         # Make the out-of-bounds cells available to randomly select
-        # Make the out-of-bounds cells available to randomly select
         if (possible_y >= grid_size or possible_y < 0):
             available_directions.append((x_direction, y_direction))
-        # Make only the non-seed growth cells available to randomly select
-        elif (0 <= possible_y < grid_size 
-            and not seed_growth_grid[possible_y, possible_x]):
         # Make only the non-seed growth cells available to randomly select
         elif (0 <= possible_y < grid_size 
             and not seed_growth_grid[possible_y, possible_x]):
@@ -113,12 +102,9 @@ def random_walk(x, y, grid_size, seed_growth_grid):
     # Randomly choose a direction from the available directions
     idx = np.random.randint(len(available_directions))
     x_change, y_change = available_directions[idx]
-    idx = np.random.randint(len(available_directions))
-    x_change, y_change = available_directions[idx]
 
     return (x + x_change) % grid_size, y + y_change
 
-@njit
 @njit
 def stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
     """
@@ -146,8 +132,6 @@ def stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
     """
     DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
-    DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-
     for x_direction, y_direction in DIRECTIONS:
         new_x = (x + x_direction) % grid_size
         new_y = y + y_direction
@@ -157,13 +141,10 @@ def stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
 
             if np.random.random() < sticking_prob:
                 seed_growth_grid[y, x] = 1 # EnumCellTypes.GROWTH_BLACK
-                seed_growth_grid[y, x] = 1 # EnumCellTypes.GROWTH_BLACK
                 return True
     
     return False
 
-@njit
-def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
 @njit
 def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
     """
@@ -190,17 +171,7 @@ def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
         otherwise.
     stop_type : str
         The reason the walker stopped
-        The grid after the walker has moved.
-    walk_length : int
-        The number of steps the walker took before sticking or failing.
-    successful_walk : bool
-        True if the walker stuck to the seed growth, False
-        otherwise.
-    stop_type : str
-        The reason the walker stopped
     """
-    grid_copy = np.zeros((grid_size, grid_size), dtype=np.int8)
-    #seed_growth_grid.copy()
     grid_copy = np.zeros((grid_size, grid_size), dtype=np.int8)
     #seed_growth_grid.copy()
 
@@ -213,23 +184,15 @@ def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
     successful_walk = False
     stop_type = None
 
-    walk_length = 0
-    successful_walk = False
-    stop_type = None
-
     while True:
         x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
 
         if x_new == x and y_new == y:
             grid_copy[y_new, x_new] = 3 # EnumCellTypes.WALK_FAIL_ORANGE
             stop_type = "fail"
-            grid_copy[y_new, x_new] = 3 # EnumCellTypes.WALK_FAIL_ORANGE
-            stop_type = "fail"
             break
 
         if y_new >= grid_size or y_new < 0:
-            grid_copy[y, x] = 4 # EnumCellTypes.WALK_BOUNDARY_RED
-            stop_type = "boundary"
             grid_copy[y, x] = 4 # EnumCellTypes.WALK_BOUNDARY_RED
             stop_type = "boundary"
             break
@@ -240,25 +203,16 @@ def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
             grid_copy[y_new, x_new] = 5 # EnumCellTypes.NEW_GROWTH_GREEN
             successful_walk = True
             stop_type = "stick"
-            grid_copy[y_new, x_new] = 5 # EnumCellTypes.NEW_GROWTH_GREEN
-            successful_walk = True
-            stop_type = "stick"
             break
 
         grid_copy[y_new, x_new] = 2 # EnumCellTypes.WALK_PATH_GREY
 
         walk_length += 1
-        grid_copy[y_new, x_new] = 2 # EnumCellTypes.WALK_PATH_GREY
-
-        walk_length += 1
     
     grid_copy[starting_y, starting_x] = 6 # EnumCellTypes.WALK_START_BLUE
-    grid_copy[starting_y, starting_x] = 6 # EnumCellTypes.WALK_START_BLUE
 
     return grid_copy, walk_length, successful_walk, stop_type
-    return grid_copy, walk_length, successful_walk, stop_type
 
-def monte_carlo_sim(grid_size, sticking_prob, max_walkers=100000):
 def monte_carlo_sim(grid_size, sticking_prob, max_walkers=100000):
     """
     Simulates the growth of a seed crystal using a Monte Carlo random walk method.
@@ -275,16 +229,8 @@ def monte_carlo_sim(grid_size, sticking_prob, max_walkers=100000):
     sticking_prob : float
         The probability of the walker sticking to the seed growth.
 
-
     Returns
     -------
-    results : dict
-        A dictionary containing the seed growth grid states after each walk,
-        the final walker states after each walk, and the walk length statistics.
-    walk_count : int
-        The number of walkers simulated.
-    successful_walks : int
-        The number of walkers that successfully stuck to the seed growth
     results : dict
         A dictionary containing the seed growth grid states after each walk,
         the final walker states after each walk, and the walk length statistics.
@@ -307,27 +253,8 @@ def monte_carlo_sim(grid_size, sticking_prob, max_walkers=100000):
         "successful_walk_length_stats": np.zeros(max_walkers, dtype=np.int32),
         "stop_types": np.zeros(max_walkers, dtype=str)
     }
-    successful_walks = 0
-
-    results = {
-        "seed_growth_grid_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
-        "walker_final_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
-        "walk_length_stats": np.zeros(max_walkers, dtype=np.int32),
-        "successful_seed_growth_grid_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
-        "successful_walker_final_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
-        "successful_walk_length_stats": np.zeros(max_walkers, dtype=np.int32),
-        "stop_types": np.zeros(max_walkers, dtype=str)
-    }
 
     while True:
-        if successful_walks >= max_walkers:
-            print("Ran out of storage space for successful walkers.")
-            break
-
-        if walk_count == max_walkers:
-            print("Ran out of storage space for all walkers.")
-            print("Only storing successful walkers.")
-
         if successful_walks >= max_walkers:
             print("Ran out of storage space for successful walkers.")
             break
@@ -375,10 +302,6 @@ def monte_carlo_sim_final_state_only(grid_size, sticking_prob, iterations_to_sav
 
     Parameters
     ----------
-    seed_growth_grid_states : np.ndarray
-        The seed growth grid states after each walk.
-    walker_final_states : np.ndarray
-        The final walker states after each walk.
     grid_size : int
         The size of the grid.
     sticking_prob : float
@@ -483,7 +406,6 @@ def animate_monte_carlo_sim(seed_growth_grid_states,
     norm = plt.cm.colors.BoundaryNorm([0, 1, 2, 3, 4, 5, 6, 7], cmap.N)
     
     img = ax.imshow(seed_growth_grid_states[0], cmap=cmap, norm=norm, origin="upper", extent=[0, 1, 0, 1])
-    img = ax.imshow(seed_growth_grid_states[0], cmap=cmap, norm=norm, origin="upper", extent=[0, 1, 0, 1])
 
     def update(frame):
         combined_grid = np.zeros((grid_size, grid_size), dtype=np.int8)
@@ -492,27 +414,12 @@ def animate_monte_carlo_sim(seed_growth_grid_states,
 
         img.set_array(combined_grid)
         ax.set_title(f"Walker {frame}")
-        combined_grid = np.zeros((grid_size, grid_size), dtype=np.int8)
-        combined_grid += seed_growth_grid_states[frame]
-        combined_grid += walker_final_states[frame]
 
-        img.set_array(combined_grid)
-        ax.set_title(f"Walker {frame}")
-
-        if np.all(seed_growth_grid_states[frame] == 0):
         if np.all(seed_growth_grid_states[frame] == 0):
             ani.event_source.stop()
 
         return [img]
 
-    ani = FuncAnimation(fig, update, frames=len(seed_growth_grid_states), repeat=False, interval=animation_speed)
-    
-    if save_animation:
-        os.makedirs("results", exist_ok=True)
-        filename = os.path.join("results", filename)
-        ani.save(filename, writer='ffmpeg', fps=1000/animation_speed)
-    else:
-        plt.show()
     ani = FuncAnimation(fig, update, frames=len(seed_growth_grid_states), repeat=False, interval=animation_speed)
     
     if save_animation:
