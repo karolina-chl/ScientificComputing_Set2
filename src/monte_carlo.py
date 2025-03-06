@@ -1,11 +1,11 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 from numba import njit
 from enum import IntEnum
 from matplotlib.animation import FuncAnimation
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 class EnumCellTypes(IntEnum):
     EMPTY_WHITE = 0
@@ -166,8 +166,14 @@ def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
         The grid after the walker has moved.
     walk_length : int
         The number of steps the walker took before sticking or failing.
+    successful_walk : bool
+        True if the walker stuck to the seed growth, False
+        otherwise.
+    stop_type : str
+        The reason the walker stopped
     """
-    grid_copy = seed_growth_grid.copy()
+    grid_copy = np.zeros((grid_size, grid_size), dtype=np.int8)
+    #seed_growth_grid.copy()
 
     x, y = initialize_walker(grid_size)
 
@@ -175,22 +181,28 @@ def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
     starting_y = y
 
     walk_length = 0
+    successful_walk = False
+    stop_type = None
 
     while True:
         x_new, y_new = random_walk(x, y, grid_size, seed_growth_grid)
 
         if x_new == x and y_new == y:
             grid_copy[y_new, x_new] = 3 # EnumCellTypes.WALK_FAIL_ORANGE
+            stop_type = "fail"
             break
 
         if y_new >= grid_size or y_new < 0:
             grid_copy[y, x] = 4 # EnumCellTypes.WALK_BOUNDARY_RED
+            stop_type = "boundary"
             break
 
         x, y = x_new, y_new
 
         if stick_or_walk(x, y, sticking_prob, seed_growth_grid, grid_size):
             grid_copy[y_new, x_new] = 5 # EnumCellTypes.NEW_GROWTH_GREEN
+            successful_walk = True
+            stop_type = "stick"
             break
 
         grid_copy[y_new, x_new] = 2 # EnumCellTypes.WALK_PATH_GREY
@@ -199,9 +211,9 @@ def monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob):
     
     grid_copy[starting_y, starting_x] = 6 # EnumCellTypes.WALK_START_BLUE
 
-    return grid_copy, walk_length
+    return grid_copy, walk_length, successful_walk, stop_type
 
-def monte_carlo_sim(grid_size, sticking_prob, max_walkers=1000000):
+def monte_carlo_sim(grid_size, sticking_prob, max_walkers=100000):
     """
     Simulates the growth of a seed crystal using a Monte Carlo random walk method.
     Seed starts at the center of the bottom row.
@@ -216,33 +228,124 @@ def monte_carlo_sim(grid_size, sticking_prob, max_walkers=1000000):
         The number of walkers to simulate.
     sticking_prob : float
         The probability of the walker sticking to the seed growth.
-    
+
     Returns
     -------
-    monte_carlo_data : list
-        A list of tuples containing the seed growth grid, the final grid, 
-        the starting x and y positions, and the walk length after each walk.
+    results : dict
+        A dictionary containing the seed growth grid states after each walk,
+        the final walker states after each walk, and the walk length statistics.
+    walk_count : int
+        The number of walkers simulated.
+    successful_walks : int
+        The number of walkers that successfully stuck to the seed growth
     """
     seed_growth_grid = initialize_grid(grid_size)
 
     walk_count = 0
+    successful_walks = 0
 
-    seed_growth_grid_states = np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8)
-    walker_final_states = np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8)
+    results = {
+        "seed_growth_grid_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
+        "walker_final_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
+        "walk_length_stats": np.zeros(max_walkers, dtype=np.int32),
+        "successful_seed_growth_grid_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
+        "successful_walker_final_states": np.zeros((max_walkers, grid_size, grid_size), dtype=np.int8),
+        "successful_walk_length_stats": np.zeros(max_walkers, dtype=np.int32),
+        "stop_types": np.zeros(max_walkers, dtype=str)
+    }
 
-    for i in range(max_walkers):
+    while True:
+        if successful_walks >= max_walkers:
+            print("Ran out of storage space for successful walkers.")
+            break
+
+        if walk_count == max_walkers:
+            print("Ran out of storage space for all walkers.")
+            print("Only storing successful walkers.")
+
         if np.any(seed_growth_grid[0]):
             print("Seed growth has reached the top row after {} walkers.".format(walk_count))
             break
-
         else:
-            walker_final_states[i], walk_length = monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob)
-            seed_growth_grid_states[i] = seed_growth_grid.copy()
+            (walker_final_state_single, 
+             walk_length, 
+             successful_walk, 
+             results["stop_types"]) = monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob)
+
+            if successful_walk:
+                # Stores only successful sticks
+                # If the max_walkers is reached, the successful sticks continue being stored
+                # until the the number of successful sticks reaches the max_walkers
+                results["successful_seed_growth_grid_states"][successful_walks] = seed_growth_grid.copy()
+                results["successful_walker_final_states"][successful_walks] = walker_final_state_single
+                results["successful_walk_length_stats"][successful_walks] = walk_length
+                successful_walks += 1
+            elif walk_count < max_walkers:
+                # Stores all successful and unsuccessful sticks
+                # If the max_walkers is reached, the unsuccessful sticks stop being stored
+                results["seed_growth_grid_states"][walk_count] = seed_growth_grid.copy()
+                results["walker_final_states"][walk_count] = walker_final_state_single
+                results["walk_length_stats"][walk_count] = walk_length
+
+
             walk_count += 1
 
-    return seed_growth_grid_states, walker_final_states, walk_count
+    return results, walk_count, successful_walks
 
-def animate_monte_carlo_sim(seed_growth_grid_states, walker_final_states, grid_size, animation_speed=500):
+def monte_carlo_sim_final_state_only(grid_size, sticking_prob, iterations_to_save = 25000):
+    """
+
+    """
+    seed_growth_grid = initialize_grid(grid_size)
+
+    walk_count = 0
+    successful_walk_count = 0
+    failed_walks = 0
+    boundary_walks = 0
+
+    walk_length_sum = 0
+    successful_walk_length_sum = 0
+
+    growth_over_time = np.full(iterations_to_save, np.nan)
+
+    growth_over_time[0] = np.sum(seed_growth_grid)
+
+    while True:
+        if np.any(seed_growth_grid[0]):
+            print("Seed growth has reached the top row after {} walkers.".format(walk_count))
+            break
+        else:
+            (_, 
+             walk_length, 
+             successful_walk, 
+             stop_type) = monte_carlo_single_walk(seed_growth_grid, grid_size, sticking_prob)
+
+            if successful_walk:
+                successful_walk_count += 1
+                successful_walk_length_sum += walk_length
+            
+            if stop_type == "fail":
+                failed_walks += 1
+            elif stop_type == "boundary":
+                boundary_walks += 1
+
+            walk_count += 1
+            walk_length_sum += walk_length
+
+            if walk_count % 10 == 0:
+                growth_over_time[walk_count//10] = np.sum(seed_growth_grid)
+
+    avg_walk_length = walk_length_sum / walk_count
+    avg_successful_walk_length = successful_walk_length_sum / successful_walk_count
+
+    return seed_growth_grid, walk_count, successful_walk_count, avg_walk_length, avg_successful_walk_length, growth_over_time
+
+def animate_monte_carlo_sim(seed_growth_grid_states, 
+                            walker_final_states, 
+                            grid_size,
+                            save_animation=False,
+                            filename="monte_carlo_animation.mp4", 
+                            animation_speed=500):
     """
     Animates the growth of a seed crystal using a Monte Carlo random walk method.
     Seed starts at the center of the bottom row.
@@ -251,21 +354,23 @@ def animate_monte_carlo_sim(seed_growth_grid_states, walker_final_states, grid_s
 
     Parameters
     ----------
+    seed_growth_grid_states : np.ndarray
+        The seed growth grid states after each walk.
+    walker_final_states : np.ndarray
+        The final walker states after each walk.
     grid_size : int
         The size of the grid.
-    num_walkers : int
-        The number of walkers to simulate.
-    sticking_prob : float
-        The probability of the walker sticking to the seed growth.
-    animation_speed : int, optional
-        The speed of the animation in milliseconds, by default 500.
+    save_animation : bool
+        Whether to save the animation.
+    filename : str
+        The filename to save the animation.
+    animation_speed : int
+        The speed of the animation in milliseconds.
     
     Returns
     -------
-    seed_growth_grid : np.ndarray
-        The final seed growth grid.
+    None
     """
-    num_walks = 0
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.axis("off")
@@ -275,7 +380,6 @@ def animate_monte_carlo_sim(seed_growth_grid_states, walker_final_states, grid_s
     img = ax.imshow(seed_growth_grid_states[0], cmap=cmap, norm=norm, origin="upper", extent=[0, 1, 0, 1])
 
     def update(frame):
-
         combined_grid = np.zeros((grid_size, grid_size), dtype=np.int8)
         combined_grid += seed_growth_grid_states[frame]
         combined_grid += walker_final_states[frame]
@@ -285,12 +389,19 @@ def animate_monte_carlo_sim(seed_growth_grid_states, walker_final_states, grid_s
 
         if np.all(seed_growth_grid_states[frame] == 0):
             ani.event_source.stop()
-            num_walks = frame
 
         return [img]
 
     ani = FuncAnimation(fig, update, frames=len(seed_growth_grid_states), repeat=False, interval=animation_speed)
-    plt.show()
+    
+    if save_animation:
+        os.makedirs("results", exist_ok=True)
+        filename = os.path.join("results", filename)
+        ani.save(filename, writer='ffmpeg', fps=1000/animation_speed)
+    else:
+        plt.show()
+
+
 
 def plot_monte_carlo(grid, save_plot, filename):
     """
@@ -321,3 +432,63 @@ def plot_monte_carlo(grid, save_plot, filename):
         print(f"Plot saved as {file_location}")
     else:
         plt.show()
+
+def run_multiple_simulations(grid_size, 
+                             sticking_prob, 
+                             num_simulations, 
+                             iterations_to_save=25000):
+    """
+    Runs multiple Monte Carlo simulations.
+
+    Parameters
+    ----------
+    grid_size : int
+        The size of the grid.
+    sticking_prob : float
+        The probability of the walker sticking to the seed growth.
+    num_simulations : int
+        The number of simulations to run.
+    iterations_to_save : int
+        The number of iterations to save the growth over time.
+    
+    Returns
+    -------
+    final_seed_growth_states : list
+        A list of the final seed growth states for each simulation.
+    all_walk_counts : list
+        A list of the number of walkers simulated for each simulation.
+    all_successful_walks : list
+        A list of the number of successful walkers for each simulation.
+    all_avg_walk_lengths : list
+        A list of the average walk lengths for each simulation.
+    all_avg_successful_walk_lengths : list
+        A list of the average successful walk lengths for each simulation.
+    all_growth_over_time : list
+        A list of the growth over time for each simulation.
+    """
+    final_seed_growth_states = np.zeros((num_simulations, grid_size, grid_size), dtype=np.int8)
+    all_walk_counts = np.zeros(num_simulations, dtype=np.int32)
+    all_successful_walks = np.zeros(num_simulations, dtype=np.int32)
+    all_avg_walk_lengths = np.zeros(num_simulations, dtype=np.float32)
+    all_avg_successful_walk_lengths = np.zeros(num_simulations, dtype=np.float32)
+    all_growth_over_time = np.zeros((num_simulations, iterations_to_save), dtype=np.float32)
+
+
+    with ProcessPoolExecutor() as executor:
+        futures = [executor.submit(monte_carlo_sim_final_state_only, grid_size, sticking_prob) for _ in range(num_simulations)]
+        for i, future in enumerate(as_completed(futures)):
+            sim_result = future.result()
+            print(f"Simulation {i+1} complete.")
+            final_seed_growth_states[i] = sim_result[0]
+            all_walk_counts[i] = sim_result[1]
+            all_successful_walks[i] = sim_result[2]
+            all_avg_walk_lengths[i] = sim_result[3]
+            all_avg_successful_walk_lengths[i] = sim_result[4]
+            all_growth_over_time[i] = sim_result[5]
+
+    return (final_seed_growth_states, 
+            all_walk_counts, 
+            all_successful_walks, 
+            all_avg_walk_lengths, 
+            all_avg_successful_walk_lengths, 
+            all_growth_over_time)
