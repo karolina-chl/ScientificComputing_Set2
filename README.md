@@ -28,29 +28,32 @@ venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. **Initialize Directories as Packages**: This step will ensure that all function imports from different directories are recognized by initializing the directories as packages in the virtual envirnment. This step may be unnecessary if your IDE automatically established the environmental variable `PYTHON_PATH` for your imports.
+4. **Initialize Directories as Packages**: This step will ensure that all function imports from different directories are recognized by initializing the directories as packages in the virtual environment. This step may be unnecessary if your IDE automatically established the environmental variable `PYTHON_PATH` for your imports.
 ``` sh
 pip install -e .
 ```
 
-4. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a simulation using the GUI:
+5. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a Monte Carlo simulation:
 ```sh
-python src/main_run_gui.py
+python scripts/script_monte_carlo_single.py
 ```
 
-5. **Generate Plots**: Use the [PlotGenerator](http://_vscodecontentref_/1) class to generate plots from the simulation results. For example:
+6. **Generate Plots**: Use the provided utility functions to generate plots from the simulation results. For example:
 ```python
-from ForestFirePercolation.src.plots.plot_generator import PlotGenerator
+from src.utils import generate_heatmap, plot_histogram
 
-generator = PlotGenerator("path/to/your/data.csv")
-generator.generate_base_experiment_plots()
+# Example usage
+generate_heatmap(data, "Title", "Colorbar Label", save_plot=True, plot_file_name="heatmap.png")
+plot_histogram(data, "Title", "X Label", "Y Label", save_plot=True, plot_file_name="histogram.png")
 ```
-
 
 ## Implementation
-The Diffusion Limted Aggregation, Monte Carlo Random Walk, and Gray-Scott models are implemented using Python and consists of several modules to handle different aspects of the simulation and analysis. Below is an overview of the main components:
+The Diffusion Limited Aggregation, Monte Carlo Random Walk, and Gray-Scott models are implemented using Python and consist of several modules to handle different aspects of the simulation and analysis. Below is an overview of the main components:
 
-
+- `src/monte_carlo.py`: Contains the implementation of the Monte Carlo random walk simulation.
+- `src/utils.py`: Contains utility functions for plotting and saving data.
+- `scripts/script_monte_carlo_single.py`: Script to run a single Monte Carlo simulation.
+- `scripts/script_monte_carlo_multiple.py`: Script to run multiple Monte Carlo simulations and save the results.
 
 ## Contributing
 If you would like to contribute to this project, please follow these steps:
