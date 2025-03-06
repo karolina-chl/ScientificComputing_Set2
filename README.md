@@ -33,12 +33,14 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-5. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a Monte Carlo simulation:
+5. **Download Data**: Due to the size of the data, it needs to be downloaded from [this Google Drive](https://drive.google.com/drive/folders/1fPOr1cQ9oqUu0NXwZVy0CqGNobJ3KBoG?usp=sharing) and placed in the data directory `main/data`.
+
+6. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a Monte Carlo simulation:
 ```sh
 python scripts/script_monte_carlo_single.py
 ```
 
-6. **Generate Plots**: Use the provided utility functions to generate plots from the simulation results. For example:
+7. **Generate Plots**: Use the provided utility functions to generate plots from the simulation results. For example:
 ```python
 from src.utils import generate_heatmap, plot_histogram
 
