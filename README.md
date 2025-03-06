@@ -35,7 +35,7 @@ pip install -e .
 
 5. **Download Data**: Due to the size of the data, it needs to be downloaded from [this Google Drive](https://drive.google.com/drive/folders/1fPOr1cQ9oqUu0NXwZVy0CqGNobJ3KBoG?usp=sharing) and placed in the data directory `main/data`.
 
-6. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a Monte Carlo simulation:
+6. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a single Monte Carlo simulation, modify and run:
 ```sh
 python scripts/script_monte_carlo_single.py
 ```
@@ -54,8 +54,9 @@ The Diffusion Limited Aggregation, Monte Carlo Random Walk, and Gray-Scott model
 
 - `src/monte_carlo.py`: Contains the implementation of the Monte Carlo random walk simulation.
 - `src/utils.py`: Contains utility functions for plotting and saving data.
-- `scripts/script_monte_carlo_single.py`: Script to run a single Monte Carlo simulation.
-- `scripts/script_monte_carlo_multiple.py`: Script to run multiple Monte Carlo simulations and save the results.
+- `scripts/script_monte_carlo_single.py`: Script to run a single Monte Carlo simulation with variable parameters.
+- `scripts/script_monte_carlo_sim_multi.py`: Script to run multiple Monte Carlo simulations and save the results with variable parameters
+- `scripts/script_monte_carlo_plot_multi.py`: Script to read Monte Carlo Simulation data output from `script_monte_carlo_sim_multi.py` read from `\data` repository.
 
 ## Contributing
 If you would like to contribute to this project, please follow these steps:

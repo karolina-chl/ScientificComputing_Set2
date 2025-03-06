@@ -2,6 +2,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib.cm import get_cmap
+
 def plot_boolean_grid(grid, save_plot, filename):
     """
     Plots the final seed growth grid.
@@ -26,6 +28,8 @@ def plot_boolean_grid(grid, save_plot, filename):
     plt.imshow(grid, cmap="gray_r", origin="upper", extent=[0, 1, 0, 1])
     plt.axis("off")
 
+    plt.tight_layout() 
+
     if save_plot:
         plt.savefig(file_location, dpi=300)
         print(f"Plot saved as {file_location}")
@@ -49,6 +53,8 @@ def generate_heatmap(all_seed_growth_grids,
     plt.xlabel(xlabel, fontsize=16)
     plt.ylabel(ylabel, fontsize=16)
 
+    plt.tight_layout() 
+
     if save_plot:
         os.makedirs("results", exist_ok=True)
         save_location = os.path.join("results", plot_file_name)
@@ -68,6 +74,8 @@ def plot_histogram(data,
     #plt.title(title)
     plt.xlabel(xlabel, fontsize=16)
     plt.ylabel(ylabel, fontsize=16)
+
+    plt.tight_layout() 
     
     if save_plot:
         os.makedirs("results", exist_ok=True)
@@ -93,6 +101,8 @@ def plot_many_line(data_array,
     plt.xlabel(xlabel, fontsize=16)
     plt.ylabel(ylabel, fontsize=16)
     plt.legend()
+
+    plt.tight_layout() 
     
     if save_plot:
         os.makedirs("results", exist_ok=True)
@@ -121,6 +131,8 @@ def plot_variance(data,
     #plt.title(title)
     plt.xlabel(xlabel, fontsize=16)
     plt.ylabel(ylabel, fontsize=16)
+
+    plt.tight_layout() 
     
     if save_plot:
         os.makedirs("results", exist_ok=True)
@@ -153,6 +165,8 @@ def plot_many_runs_experiment(data,
     plt.ylabel('x (center of mass)')
     plt.legend()
 
+    plt.tight_layout() 
+
     if save_plot:
         plot_file_name = "deviation_" + plot_file_name
         os.makedirs("results", exist_ok=True)
@@ -163,9 +177,11 @@ def plot_many_runs_experiment(data,
     
     plt.figure(figsize=(8, 4))
     plt.plot(ys, num_cells_per_cross, label='$N_y$')
-    plt.xlabel('y (cross section)')
-    plt.ylabel('Number of cells')
+    plt.xlabel('y (cross section)', fontsize=16)
+    plt.ylabel('Number of cells', fontsize=16)
     plt.legend()
+
+    plt.tight_layout() 
 
     if save_plot:
         plot_file_name = "cross_section_" + plot_file_name
@@ -181,8 +197,9 @@ def plot_many_runs_experiment_multiple(sticking_prob_array,
                             plot_file_name="flat_histogram.png"):
     
     plt.figure(figsize=(8, 4))
+    cmap = get_cmap('winter')  # Use a colormap with easily distinguishable colors
 
-    for sticking_prob in sticking_prob_array:
+    for i, sticking_prob in enumerate(sticking_prob_array):
         sticking_prob_str = str(sticking_prob).replace(".", "_")
         data = load_data(load_file_name + str(sticking_prob_str) + "_sp.npy")
         num_runs, _, grid_size = data.shape
@@ -194,11 +211,13 @@ def plot_many_runs_experiment_multiple(sticking_prob_array,
         xdiff = np.abs(xs - center)
 
         num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-        plt.plot(ys, num_cells_per_cross, label=str(sticking_prob))
+        plt.plot(ys, num_cells_per_cross, label=str(sticking_prob), color=cmap(i/len(sticking_prob_array)))
 
-    plt.xlabel('y (cross section)')
-    plt.ylabel('Number of cells')
+    plt.xlabel('y (cross section)', fontsize=16)
+    plt.ylabel('Number of cells', fontsize=16)
     plt.legend()
+
+    plt.tight_layout() 
 
     if save_plot:
         plot_file_name = "cross_section_" + plot_file_name
@@ -224,6 +243,8 @@ def flat_histogram(data,
     plt.xlabel(xlabel, fontsize=16)
     plt.ylabel(ylabel, fontsize=16)
     plt.yscale('log')
+
+    plt.tight_layout() 
 
     if save_plot:
         os.makedirs("results", exist_ok=True)
@@ -255,6 +276,8 @@ def flat_histogram_multiple(sticking_prob_array,
     plt.ylabel(ylabel, fontsize=16)
     plt.legend()
     plt.yscale('log')
+
+    plt.tight_layout() 
 
     if save_plot:
         os.makedirs("results", exist_ok=True)
