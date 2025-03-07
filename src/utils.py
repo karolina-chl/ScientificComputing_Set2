@@ -4,7 +4,11 @@ import numpy as np
 
 from matplotlib.cm import get_cmap
 
-def plot_boolean_grid(grid, save_plot, filename):
+
+"""
+Plots Should be universal
+"""
+def plot_boolean_grid(grid, save_plot, file_path):
     """
     Plots the final seed growth grid.
 
@@ -21,9 +25,6 @@ def plot_boolean_grid(grid, save_plot, filename):
     -------
     None
     """
-    os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-    file_location = os.path.join("results", filename)
-
     plt.figure(figsize=(10, 8))
     plt.imshow(grid, cmap="gray_r", origin="upper", extent=[0, 1, 0, 1])
     plt.axis("off")
@@ -31,8 +32,8 @@ def plot_boolean_grid(grid, save_plot, filename):
     plt.tight_layout() 
 
     if save_plot:
-        plt.savefig(file_location, dpi=300)
-        print(f"Plot saved as {file_location}")
+        plt.savefig(file_path, dpi=300)
+        print(f"Plot saved as {file_path}")
     else:
         plt.show()
 
@@ -42,7 +43,7 @@ def generate_heatmap(all_seed_growth_grids,
                      ylabel="Y", 
                      xlabel="X", 
                      save_plot=False, 
-                     plot_file_name="heatmap.png"):
+                     file_path="heatmap.png"):
     summed_grid = np.sum(all_seed_growth_grids, axis=0)
     normalized_grid = summed_grid / all_seed_growth_grids.shape[0]
     
@@ -56,9 +57,7 @@ def generate_heatmap(all_seed_growth_grids,
     plt.tight_layout() 
 
     if save_plot:
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
+        plt.savefig(file_path)
 
     plt.show()
 
@@ -67,7 +66,7 @@ def plot_histogram(data,
                    xlabel, 
                    ylabel, 
                    save_plot=False, 
-                   plot_file_name="histogram.png"):
+                   file_path="histogram.png"):
 
     plt.figure(figsize=(8, 4))
     plt.hist(data, bins=50)
@@ -78,15 +77,13 @@ def plot_histogram(data,
     plt.tight_layout() 
     
     if save_plot:
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
+        plt.savefig(file_path)
 
     plt.show()
 
-def plot_cross_section_and_deviation(data,
-                            save_plot=False, 
-                            plot_file_name="flat_histogram.png"):
+def plot_cross_section(data,
+                        save_plot=False, 
+                        file_path="flat_histogram.png"):
     num_runs, _, grid_size = data.shape
 
     sum_grid = np.sum(data, axis=0)
@@ -94,10 +91,7 @@ def plot_cross_section_and_deviation(data,
     xs = ys.copy()
     center = xs[grid_size//2]
     xdiff = np.abs(xs - center)
-
-    num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-    
-    
+   
     mabs = np.sum(xdiff[None, :]*sum_grid/num_runs, axis=1)
     mean = np.sum(xs[None, :]*sum_grid/np.sum(sum_grid, axis=1)[:,None], axis=1)
     
@@ -111,13 +105,23 @@ def plot_cross_section_and_deviation(data,
     plt.tight_layout() 
 
     if save_plot:
-        plot_file_name = "deviation_" + plot_file_name
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
+        plt.savefig(file_path)
 
     plt.show()
     
+def plot_deviation(data,
+                    save_plot=False, 
+                    file_path="flat_histogram.png"):
+    num_runs, _, grid_size = data.shape
+
+    sum_grid = np.sum(data, axis=0)
+    ys = np.linspace(0,1,grid_size)
+    xs = ys.copy()
+    center = xs[grid_size//2]
+    xdiff = np.abs(xs - center)
+
+    num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
+
     plt.figure(figsize=(4,8))
     plt.plot(num_cells_per_cross, ys, label='$N_y$')
     plt.ylabel('y (cross section)', fontsize=16)
@@ -127,18 +131,42 @@ def plot_cross_section_and_deviation(data,
     plt.tight_layout() 
 
     if save_plot:
-        plot_file_name = "cross_section_" + plot_file_name
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
+        plt.savefig(file_path)
 
     plt.show()
 
+def flat_histogram(data,
+                  title, 
+                  xlabel, 
+                  ylabel, 
+                  save_plot=False, 
+                  file_path="flat_histogram.png"):
+    num_runs = data.shape[0]
+    sum_grid = np.sum(data, axis=0).reshape([-1]) / num_runs
+    hist, bins = np.histogram(sum_grid, np.linspace(0,1,20))
+    
+    plt.figure(figsize=(8, 4))
+    plt.bar(bins[:-1], hist, width=0.05)
+    #plt.title(title)
+    plt.xlabel(xlabel, fontsize=16)
+    plt.ylabel(ylabel, fontsize=16)
+    plt.yscale('log')
+
+    plt.tight_layout() 
+
+    if save_plot:
+        plt.savefig(file_path)
+    
+    plt.show()
+
+
+"""
+    Plots only for Monte Carlo Currently
+"""
 def plot_cross_section_and_deviation_multiple(parameter_array,
                                             load_file_name,
                                             save_plot=False, 
                                             plot_file_name="flat_histogram.png"):
-    
     plt.figure(figsize=(4,8))
     cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
 
@@ -164,32 +192,6 @@ def plot_cross_section_and_deviation_multiple(parameter_array,
 
     if save_plot:
         plot_file_name = "cross_section_" + plot_file_name
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
-    
-    plt.show()
-
-def flat_histogram(data,
-                  title, 
-                  xlabel, 
-                  ylabel, 
-                  save_plot=False, 
-                  plot_file_name="flat_histogram.png"):
-    num_runs = data.shape[0]
-    sum_grid = np.sum(data, axis=0).reshape([-1]) / num_runs
-    hist, bins = np.histogram(sum_grid, np.linspace(0,1,20))
-    
-    plt.figure(figsize=(8, 4))
-    plt.bar(bins[:-1], hist, width=0.05)
-    #plt.title(title)
-    plt.xlabel(xlabel, fontsize=16)
-    plt.ylabel(ylabel, fontsize=16)
-    plt.yscale('log')
-
-    plt.tight_layout() 
-
-    if save_plot:
         os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
         save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
@@ -229,6 +231,10 @@ def flat_histogram_multiple(sticking_prob_array,
     
     plt.show()
 
+
+"""
+Save/Load npy files
+"""
 def save_data(data, filename):
     os.makedirs("data", exist_ok=True)
     

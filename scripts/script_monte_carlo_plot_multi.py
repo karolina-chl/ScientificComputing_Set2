@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from src.utils import generate_heatmap, plot_histogram, flat_histogram, plot_cross_section_and_deviation, flat_histogram_multiple, plot_cross_section_and_deviation_multiple
+from src.utils import generate_heatmap, plot_histogram, flat_histogram, plot_cross_section, plot_deviation, flat_histogram_multiple, plot_cross_section_and_deviation_multiple
 
 def generate_save_names(sticking_prob_str):
     return [
@@ -21,13 +21,47 @@ def scrpt_plot_monte_carlo_results(sticking_prob):
 
     final_seed_growth_states, all_walk_counts, all_successful_walks, all_avg_walk_lengths, all_avg_successful_walk_lengths = load_data_files(save_names)
 
-    generate_heatmap(final_seed_growth_states, "Final seed growth states", "Frequency", save_plot=True, plot_file_name="heatmap_" + save_names[0].replace(".npy", ".png"))
-    flat_histogram(final_seed_growth_states, "Flat histogram of final seed growth states", "Final seed growth states", "Frequency", save_plot=True, plot_file_name="histogram_" + save_names[0].replace(".npy", ".png"))
-    plot_cross_section_and_deviation(final_seed_growth_states, save_plot=True, plot_file_name="many_runs_" + save_names[0].replace(".npy", ".png"))
-    plot_histogram(all_walk_counts, "Histogram of all walk counts", "Number of walks", "Frequency", save_plot=True, plot_file_name="histogram_" + save_names[1].replace(".npy", ".png"))
-    plot_histogram(all_successful_walks, "Histogram of all successful walks", "Number of successful walks", "Frequency", save_plot=True, plot_file_name="histogram_" + save_names[2].replace(".npy", ".png"))
-    plot_histogram(all_avg_walk_lengths, "Histogram of all average walk lengths", "Average walk length", "Frequency", save_plot=True, plot_file_name="histogram_" + save_names[3].replace(".npy", ".png"))
-    plot_histogram(all_avg_successful_walk_lengths, "Histogram of all average successful walk lengths", "Average successful walk length", "Frequency", save_plot=True, plot_file_name="histogram_" + save_names[4].replace(".npy", ".png"))
+    generate_heatmap(final_seed_growth_states, 
+                     "Final seed growth states", 
+                     "Frequency", 
+                     save_plot=True, 
+                     file_path=os.path.join("results", "monte_carlo", "heatmap_" + save_names[0].replace(".npy", ".png")))
+    flat_histogram(final_seed_growth_states, 
+                   "Flat histogram of final seed growth states", 
+                   "Final seed growth states", 
+                   "Frequency", 
+                   save_plot=True, 
+                   file_path=os.path.join("results", "monte_carlo", "histogram_" + save_names[0].replace(".npy", ".png")))
+    plot_cross_section(final_seed_growth_states, 
+                       save_plot=True, 
+                       file_path=os.path.join("results", "monte_carlo", "cross_section_" + save_names[0].replace(".npy", ".png")))
+    plot_deviation(final_seed_growth_states, 
+                   save_plot=True, 
+                   file_path=os.path.join("results", "monte_carlo", "deviation_" + save_names[0].replace(".npy", ".png")))
+    plot_histogram(all_walk_counts, 
+                   "Histogram of all walk counts", 
+                   "Number of walks", 
+                   "Frequency", 
+                   save_plot=True, 
+                   file_path=os.path.join("results", "monte_carlo", "histogram_" + save_names[1].replace(".npy", ".png")))
+    plot_histogram(all_successful_walks, 
+                   "Histogram of all successful walks", 
+                   "Number of successful walks", 
+                   "Frequency", 
+                   save_plot=True, 
+                   file_path=os.path.join("results", "monte_carlo", "histogram_" + save_names[2].replace(".npy", ".png")))
+    plot_histogram(all_avg_walk_lengths, 
+                   "Histogram of all average walk lengths", 
+                   "Average walk length", 
+                   "Frequency", 
+                   save_plot=True, 
+                   file_path=os.path.join("results", "monte_carlo", "histogram_" + save_names[3].replace(".npy", ".png")))
+    plot_histogram(all_avg_successful_walk_lengths, 
+                   "Histogram of all average successful walk lengths", 
+                   "Average successful walk length", 
+                   "Frequency", 
+                   save_plot=True, 
+                   file_path=os.path.join("results", "monte_carlo", "histogram_" + save_names[4].replace(".npy", ".png")))
 if __name__ == "__main__":
 
     sticking_prob = 1.0
