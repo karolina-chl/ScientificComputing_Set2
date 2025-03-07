@@ -29,7 +29,7 @@ def plot_single_run_with_eta(etas):
 
         # plot_animation(c[:num_iter], g[:num_iter])
     fig.tight_layout()
-    plt.savefig('../results/run_with_eta_{}.png', dpi=600)
+    plt.savefig('../results/diffusion_limited_aggregation/run_with_eta_{}.png', dpi=600)
     plt.show()
         
         
