@@ -1,12 +1,3 @@
-import sys
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Get the absolute path of the project's root directory
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(project_root)
-
 from src.gray_scott import init_grids, solve_gray_scott, plot_animation, last_frame_gray_scott_save
     
 def animation(): 
