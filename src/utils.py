@@ -158,9 +158,9 @@ def plot_many_runs_experiment(data,
     
     mabs = np.sum(xdiff[None, :]*sum_grid/num_runs, axis=1)
     mean = np.sum(xs[None, :]*sum_grid/np.sum(sum_grid, axis=1)[:,None], axis=1)
-    plt.figure(figsize=(8, 4))
-    plt.plot(ys, mabs, label='$|x-<x>|$')
-    plt.plot(ys, mean, label='<x>')
+    plt.figure(figsize=(4,8))
+    plt.plot(mabs, ys, label='$|x-<x>|$')
+    plt.plot(mean, ys, label='<x>')
     plt.xlabel('y (cross section)')
     plt.ylabel('x (center of mass)')
     plt.legend()
@@ -175,10 +175,10 @@ def plot_many_runs_experiment(data,
 
     plt.show()
     
-    plt.figure(figsize=(8, 4))
-    plt.plot(ys, num_cells_per_cross, label='$N_y$')
-    plt.xlabel('y (cross section)', fontsize=16)
-    plt.ylabel('Number of cells', fontsize=16)
+    plt.figure(figsize=(4,8))
+    plt.plot(num_cells_per_cross, ys, label='$N_y$')
+    plt.ylabel('y (cross section)', fontsize=16)
+    plt.xlabel('Number of cells', fontsize=16)
     plt.legend()
 
     plt.tight_layout() 
@@ -196,7 +196,7 @@ def plot_many_runs_experiment_multiple(sticking_prob_array,
                             save_plot=False, 
                             plot_file_name="flat_histogram.png"):
     
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(4,8))
     cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
 
     for i, sticking_prob in enumerate(sticking_prob_array):
@@ -211,10 +211,10 @@ def plot_many_runs_experiment_multiple(sticking_prob_array,
         xdiff = np.abs(xs - center)
 
         num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-        plt.plot(ys, num_cells_per_cross, label=str(sticking_prob), color=cmap(i/len(sticking_prob_array)))
-
-    plt.xlabel('y (cross section)', fontsize=16)
-    plt.ylabel('Number of cells', fontsize=16)
+        plt.plot(num_cells_per_cross, ys, label=str(sticking_prob), color=cmap(i/len(sticking_prob_array)))
+    
+    plt.ylabel('y (cross section)', fontsize=16)
+    plt.xlabel('Number of cells', fontsize=16)
     plt.legend()
 
     plt.tight_layout() 
@@ -225,6 +225,82 @@ def plot_many_runs_experiment_multiple(sticking_prob_array,
         save_location = os.path.join("results", plot_file_name)
         plt.savefig(save_location)
     
+    plt.show()
+
+def plot_single_y_slice_density(data,
+                                save_plot=False, 
+                                plot_file_name="flat_histogram.png"):
+    num_runs, _, grid_size = data.shape
+
+    sum_grid = np.sum(data, axis=0)
+    ys = np.linspace(0,1,grid_size)
+    xs = ys.copy()
+    center = xs[grid_size//2]
+    xdiff = np.abs(xs - center)
+
+    num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
+    mean_diff_from_center = np.sum(xdiff[None, :] * sum_grid, axis=1) / np.sum(sum_grid, axis=1)
+
+    plt.figure(figsize=(4,8))
+    fig, ax1 = plt.subplots(figsize=(4, 8))
+
+    ax1.plot(mean_diff_from_center, ys, label='Mean Difference from Center', color='blue')
+    ax1.set_xlabel('Mean Difference from Center', fontsize=16)
+    ax1.set_ylabel('y (cross section)', fontsize=16)
+    ax1.legend(loc='upper left')
+
+    ax2 = ax1.twiny()
+    ax2.plot(num_cells_per_cross, ys, label='Number of cells', color='red')
+    ax2.set_xlabel('Number of cells', fontsize=16)
+    ax2.legend(loc='upper right')
+
+    plt.ylabel('y (cross section)', fontsize=16)
+    plt.xlabel('Density', fontsize=16)
+
+    plt.tight_layout() 
+
+    if save_plot:
+        plot_file_name = "density_cross_section_" + plot_file_name
+        os.makedirs("results", exist_ok=True)
+        save_location = os.path.join("results", plot_file_name)
+        plt.savefig(save_location)
+
+    plt.show()
+
+def plot_many_y_slice_density(sticking_prob_array,
+                              load_file_name,
+                              save_plot=False, 
+                              plot_file_name="flat_histogram.png"):
+    plt.figure(figsize=(4,8))
+    cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
+
+    for i, sticking_prob in enumerate(sticking_prob_array):
+        sticking_prob_str = str(sticking_prob).replace(".", "_")
+        data = load_data(load_file_name + str(sticking_prob_str) + "_sp.npy")
+        num_runs, _, grid_size = data.shape
+
+        sum_grid = np.sum(data, axis=0)
+        ys = np.linspace(0,1,grid_size)
+        xs = ys.copy()
+        center = xs[grid_size//2]
+        xdiff = np.abs(xs - center)
+
+        num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
+        density_per_cross = num_cells_per_cross / grid_size  # Calculate density
+    
+        plt.plot(density_per_cross, ys, label=str(sticking_prob), color=cmap(i/len(sticking_prob_array)))
+    plt.ylabel('y (cross section)', fontsize=16)
+    plt.xlabel('Density', fontsize=16)
+    plt.legend()
+
+    plt.tight_layout() 
+
+    if save_plot:
+        plot_file_name = "density_cross_section_" + plot_file_name
+        os.makedirs("results", exist_ok=True)
+        save_location = os.path.join("results", plot_file_name)
+        plt.savefig(save_location)
+
     plt.show()
     
 def flat_histogram(data,
