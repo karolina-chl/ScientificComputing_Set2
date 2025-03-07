@@ -17,7 +17,27 @@ def set_numba_seed(seed):
     np.random.seed(seed)
 
 @njit
-def grow_g(g, p_g, neighbors):    
+def grow_g(g, p_g, neighbors):
+    """
+    given a grid of probabilities of choosing a cell, choose the next cell to activate and update the 
+    grid of live cells and their neighbors
+    params:
+        g:      grid of live cells at one timestep [grid_size x grid_size]
+        p_g:    likelihood of choosing a cell [grid_size x grid_size]
+        neighbors: mask of neighbors of the current live cells
+        omega:              parameter of SOR
+        initial_condition:  grid of initial live cells [grid_size x grid_size], live=1
+        growth_steps:       number of cells to grow / number of DLA iterations
+        diffusion_tolerance:stop SOR when changes between iterations are smaller than tolerance
+        verbose:            decide if progress bar should be printed to stdout
+        
+    returns:
+        g:      grid of live cells at each timestep [growth_steps x grid_size x grid_size]
+        c:      grid of nutrient concentration at each timestep [growth_steps x grid_size x grid_size]
+        t:      last growth timestep when top is reached
+        total_sor_iter:  total number of finite difference timesteps of the simulation
+
+    """    
     neighbor_coords = [(0,1),(0,-1),(1,0),(-1,0)]
     grid_size = g.shape[0]
     x = np.random.uniform(0,1)
@@ -37,8 +57,25 @@ def grow_g(g, p_g, neighbors):
     assert(False)
 
 
-def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_tolerance=1e-9):
-    
+def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_tolerance=1e-4, verbose=True):    
+    """Diffusion Limited Aggregation model with a uniform source at top and sink at the bottom
+    The nutrient concentration is computed using the finite difference Successive over-relaxation (SOR) method
+    The simulation is always stopped when the top row is reached
+    params:
+        eta:                probability of choosing growth cell scales with c**eta
+        omega:              parameter of SOR
+        initial_condition:  grid of initial live cells [grid_size x grid_size], live=1
+        growth_steps:       number of cells to grow / number of DLA iterations
+        diffusion_tolerance:stop SOR when changes between iterations are smaller than tolerance
+        verbose:            decide if progress bar should be printed to stdout
+        
+    returns:
+        g:      grid of live cells at each timestep [growth_steps x grid_size x grid_size]
+        c:      grid of nutrient concentration at each timestep [growth_steps x grid_size x grid_size]
+        t:      last growth timestep when top is reached
+        total_sor_iter:  total number of finite difference timesteps of the simulation
+
+    """
     grid_size = initial_condition.shape[0]
     c = np.zeros([growth_steps, grid_size, grid_size])
     g = np.zeros_like(c)
@@ -48,9 +85,8 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     total_sor_iter = sor_iter
     for t in range(0, growth_steps-1):
         
-        if(t%(growth_steps//100)==0):
+        if verbose and (t%(growth_steps//100)==0):
             print('.', end='', flush=True)
-        
         
         c[t+1], sor_iter, sor_tol = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t])
         total_sor_iter += sor_iter
@@ -67,12 +103,14 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
         if reached_top:
             break
         # plot_grid(neighbors)
-    print('.')
+    if verbose:
+        print('.')
     
     return g, c, t, total_sor_iter
 
 
 if __name__ == '__main__':
+    #example usage:
     np.random.seed(42)
     set_numba_seed(np.random.randint(1000000000))
     grid_size = 100
@@ -80,10 +118,11 @@ if __name__ == '__main__':
     initial_cond[-2, grid_size//2] = 1
     # plot_grid(initial_cond)
                     
-    eta =2
+    eta =1
     omega = 1.85
+    diffusion_tol = 1e-4
     
-    g, c , num_iter, total_sor_iter= dla_growth(eta, omega, initial_cond, growth_steps=10000)
+    g, c , num_iter, total_sor_iter= dla_growth(eta, omega, initial_cond, growth_steps=10000, diffusion_tolerance=diffusion_tol)
         
     plot_grid(c[num_iter-1], g[num_iter-1], file='../plots/run_with_eta_{}.png'.format(eta), title=r'$\eta={}$'.format(eta), make_cbar=True)
     print(total_sor_iter)
