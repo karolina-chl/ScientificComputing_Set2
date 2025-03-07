@@ -45,7 +45,7 @@ def plot_many_runs_experiment(file, skip_ends=1):
     grids = np.load(file)
     mean_abs_diff(grids)
     plt.show()
-    # plot_grid(np.mean(grids, axis=0), file=file.replace('data', 'plots').replace('npy', 'png'), title=r'$\eta = 2$')
+    # plot_grid(np.mean(grids, axis=0), file=file.replace('data', 'results').replace('npy', 'png'), title=r'$\eta = 2$')
     num_runs, _, grid_size = grids.shape
     sum_grid = np.sum(grids, axis=0)
     ys = np.linspace(0,1,grid_size)
