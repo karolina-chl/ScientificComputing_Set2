@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from src.monte_carlo import monte_carlo_sim
+from src.monte_carlo import monte_carlo_sim, animate_monte_carlo_sim
 from src.utils import generate_heatmap, plot_grid
 
 if __name__ == "__main__":
@@ -17,6 +17,13 @@ if __name__ == "__main__":
     print("Number of successful walks: ", successful_walks)
     print("Number of total walks: ", walk_count)
     print("Success rate: ", successful_walks / walk_count)
+
+    animate_monte_carlo_sim(results["successful_seed_growth_grid_states"], 
+                            results["successful_walker_final_states"], 
+                            grid_size,
+                            save_animation=False,
+                            filename="monte_carlo_animation.mp4", 
+                            animation_speed=500)
 
     plot_grid(results["successful_seed_growth_grid_states"][successful_walks - 1], 
               growth= results["successful_seed_growth_grid_states"][successful_walks - 1], 
