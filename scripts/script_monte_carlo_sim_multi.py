@@ -10,8 +10,7 @@ def generate_save_names(sticking_prob_str):
         f"all_walk_counts_{sticking_prob_str}_sp.npy",
         f"all_successful_walks_{sticking_prob_str}_sp.npy",
         f"all_avg_walk_lengths_{sticking_prob_str}_sp.npy",
-        f"all_avg_successful_walk_lengths_{sticking_prob_str}_sp.npy",
-        f"all_growth_over_time_{sticking_prob_str}_sp.npy"
+        f"all_avg_successful_walk_lengths_{sticking_prob_str}_sp.npy"
     ]
 
 def load_data_files(save_names):
@@ -22,8 +21,7 @@ def scrpt_monte_carlo_multiple_simulations(grid_size, sticking_prob, num_simulat
     all_walk_counts_save_file, \
     all_successful_walks_save_file, \
     all_avg_walk_lengths_save_file, \
-    all_avg_successful_walk_lengths_save_file, \
-    all_growth_over_time_save_file = save_names
+    all_avg_successful_walk_lengths_save_file = save_names
 
     (final_seed_growth_states, 
      all_walk_counts, 
@@ -37,7 +35,6 @@ def scrpt_monte_carlo_multiple_simulations(grid_size, sticking_prob, num_simulat
     save_data(all_successful_walks, all_successful_walks_save_file)
     save_data(all_avg_walk_lengths, all_avg_walk_lengths_save_file)
     save_data(all_avg_successful_walk_lengths, all_avg_successful_walk_lengths_save_file)
-    save_data(all_growth_over_time, all_growth_over_time_save_file)
 
     print("All data saved successfully")
 
