@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from numba import njit
 
 
 def init_grids(total_time, time_step_size, n_steps):
@@ -17,7 +18,7 @@ def init_grids(total_time, time_step_size, n_steps):
         The size of time step size.
     n_steps : int
         The size of the grid. 
-    
+        
     Returns
     -------
     chemical_U : np.ndarray
@@ -28,30 +29,21 @@ def init_grids(total_time, time_step_size, n_steps):
     """
     # Step size
     time_step_num = int(total_time/time_step_size)
-    
-    # # Initiallizing the grid  
-    # x_dimension = np.linspace(0, x_length, n_steps) 
-    # y_dimension = np.linspace(0, y_length, n_steps)
 
     chemical_U = np.zeros((time_step_num, n_steps, n_steps))
     chemical_V = np.zeros((time_step_num, n_steps, n_steps))
 
-    # Boundry conditions for U and V
-    chemical_U[0,0, :] = 1.0
-    chemical_U[0,-1, :] = 0.0
-    chemical_V[0,0, :] = 0.0
-    chemical_V[0,-1, :] = 0.0
-
     # Initial conditions for U and V 
     chemical_U[0,:,:] = 0.5
-    chemical_V[0,23:28,23:28] = 0.25
+    chemical_V[0,45:55,45:55] = 0.25
 
     return chemical_U, chemical_V
 
-    
-def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_length, n_steps, diffusion_coefficient_u, diffusion_coefficient_v, U_supply, k):
+
+@njit   
+def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_length, n_steps, diffusion_coefficient_u, diffusion_coefficient_v, U_supply, k, noise_boundry):
     """
-    Simulates gray_scott model in two dimensions.  
+    Simulates gray_scott model in two dimensions. Both horizontally and vertically the grids have periodic boundries. Noise can be introduced into the model.  
 
     Parameters
     ----------
@@ -67,14 +59,18 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_lengt
         The max value of X. 
     n_steps : int
         The size of the grid. 
-    diffusion_coefficient_u: int
+    diffusion_coefficient_u: float
         Diffusion coefficient for chemical U. 
-    diffusion_coefficient_v: int 
+    diffusion_coefficient_v: float 
         Diffusion coefficient for chemical V. 
-    U_supply : int
+    U_supply : float
         The rate at which U is supplied. 
-    k : int 
+    k : float 
         k parameter. The sum (f + k) controls the rate at which chemical V decays. 
+    noise_boundry : float
+        The boudry of the uniform distribution from which the noise comes form. If set to zero, no noise is introduced into the model. 
+
+
     Returns
     -------
     None
@@ -93,11 +89,11 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_lengt
         for time in range(time_step_num-1): 
             chemical_U_new = chemical_U[time].copy()
             chemical_V_new = chemical_V[time].copy()
-            for rows in range(1, n_steps -1):
+            for rows in range(n_steps):
                 for columns in range(n_steps):
                     #changes in chemical U
                     difussion_component_U = ((diffusion_coefficient_u/(x_step_size**2))*(
-                    chemical_U[time, rows + 1, columns] + chemical_U[time, rows -1, columns]
+                    chemical_U[time, (rows + 1)%n_steps, columns] + chemical_U[time, (rows -1)%n_steps, columns]
                     + chemical_U[time, rows, (columns + 1)%n_steps] + chemical_U[time, rows, (columns -1)%n_steps] 
                     - 4*chemical_U[time, rows, columns])
                     )
@@ -106,12 +102,14 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_lengt
                     - chemical_U[time, rows, columns]*chemical_V[time, rows, columns]**2 
                     + U_supply * (1-chemical_U[time, rows, columns])
                     )
-                    
-                    chemical_U_new[rows, columns] += time_step_size*(difussion_component_U + reaction_component_U)
+                    noise = np.random.uniform(-noise_boundry,noise_boundry,1)
+                    noise_U = noise.item()
+
+                    chemical_U_new[rows, columns] = chemical_U_new[rows, columns] + time_step_size*(difussion_component_U + reaction_component_U + noise_U)
 
                     #changes in chemical V 
                     difussion_component_V = ((diffusion_coefficient_v/(x_step_size**2))*(
-                    chemical_V[time, rows + 1, columns] + chemical_V[time, rows -1, columns]
+                    chemical_V[time, (rows + 1)%n_steps, columns] + chemical_V[time, (rows -1)%n_steps, columns]
                     + chemical_V[time, rows, (columns + 1)%n_steps] + chemical_V[time, rows, (columns -1)%n_steps] 
                     - 4*chemical_V[time, rows, columns])
                     )
@@ -120,19 +118,13 @@ def solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_lengt
                     chemical_U[time, rows, columns]*chemical_V[time, rows, columns]**2 
                     - (U_supply + k)* (chemical_V[time, rows, columns])
                     )
+                    noise = np.random.uniform(-noise_boundry,noise_boundry,1)
+                    noise_V = noise.item()
 
-                    chemical_V_new[rows, columns] += time_step_size*(difussion_component_V + reaction_component_V)
+                    chemical_V_new[rows, columns] = chemical_V_new[rows, columns] + time_step_size*(difussion_component_V + reaction_component_V + noise_V)
 
             chemical_U[time + 1] = chemical_U_new
             chemical_V[time + 1] = chemical_V_new
-
-            # Top and Bottom Boundaries
-            chemical_U[time + 1,0, :] = 1.0
-            chemical_U[time + 1,-1, :] = 0.0
-
-            chemical_V[time + 1,0, :] = 0.0
-            chemical_V[time + 1,-1, :] = 0.0
-
 
 def plot_animation(c):
     """
@@ -167,7 +159,7 @@ def plot_animation(c):
     return anim
 
 
-def last_frame_gray_scott(c, filename):
+def last_frame_gray_scott_save(c, filename):
     """
     Returns and saves the last frame of the Gray-Scott simulation in high quality.
 
@@ -187,18 +179,16 @@ def last_frame_gray_scott(c, filename):
     """
     last_frame = c[-1]  # Get the last time step
 
-    fig, ax = plt.subplots()
-    im = ax.imshow(last_frame, cmap="hot", extent=[0, 1, 0, 1])
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    fig, ax = plt.subplots(figsize = (12,10))
+    image = ax.imshow(last_frame, cmap="hot", extent=[0, 1, 0, 1])
+    ax.set_xlabel("X", fontsize = 35)
+    plt.xticks([0,1],fontsize=35)
+    ax.set_ylabel("Y", fontsize = 35)
+    plt.yticks([0,1], fontsize=35)
 
-    cbar = plt.colorbar(im)
-    cbar.set_label("Concentration")
-    plt.savefig(filename, dpi=300, bbox_inches="tight")
+    cbar = plt.colorbar(image)
+    cbar.ax.tick_params(labelsize=35)
+    cbar.set_label("Concentration", fontsize = 35)
+    plt.savefig(filename, dpi=300)
     plt.close(fig)
-
-
-
-
-
 
