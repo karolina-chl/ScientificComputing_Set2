@@ -197,7 +197,7 @@ def plot_many_runs_experiment_multiple(sticking_prob_array,
                             plot_file_name="flat_histogram.png"):
     
     plt.figure(figsize=(8, 4))
-    cmap = get_cmap('winter')  # Use a colormap with easily distinguishable colors
+    cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
 
     for i, sticking_prob in enumerate(sticking_prob_array):
         sticking_prob_str = str(sticking_prob).replace(".", "_")

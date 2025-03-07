@@ -4,8 +4,7 @@ from src.utils import generate_heatmap, plot_boolean_grid
 if __name__ == "__main__":
     grid_size = 101
     sticking_prob = 0.1
-    max_walkers_per_sim = 100000
-    num_simulations = 500
+    max_walkers_per_sim = 250000
     sticking_prob_str = str(sticking_prob).replace(".", "_")
 
     results, walk_count, successful_walks = monte_carlo_sim(grid_size, 
@@ -39,4 +38,4 @@ if __name__ == "__main__":
                      "Successful walker final states", 
                      "Number of walkers",
                      save_plot=True,
-                     plot_file_name="heatmap_successful_walker_final_states" + sticking_prob + ".png")
+                     plot_file_name="heatmap_successful_walker_final_states" + sticking_prob_str + ".png")

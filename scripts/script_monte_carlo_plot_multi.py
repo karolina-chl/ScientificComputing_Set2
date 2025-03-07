@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     sticking_prob = 1.0
     
-    scrpt_plot_monte_carlo_results(sticking_prob)
+    #scrpt_plot_monte_carlo_results(sticking_prob)
 
     plot_many_runs_experiment_multiple([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
                                        "final_seed_growth_states_",
