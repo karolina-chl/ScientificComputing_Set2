@@ -8,34 +8,32 @@ from matplotlib.cm import get_cmap
 """
 Plots Should be universal
 """
-def plot_boolean_grid(grid, save_plot, file_path):
-    """
-    Plots the final seed growth grid.
+def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=None ):
+    
+    plt.tight_layout()
+    
+    grid_size = c.shape[-1]
+    return_ax = True
+    if fig is None:
+        fig, ax = plt.subplots()
+        return_ax=False
+    heatmap = ax.imshow(c, cmap="hot", extent=[0, 1, 0, 1])
+    if make_cbar:
+        cbar = plt.colorbar(heatmap)
+        cbar.set_label("Concentration")
+    if growth is not None:      
+        heatmap = ax.imshow(growth, alpha=growth, cmap='tab20b',  extent=[0, 1, 0, 1])
+    ax.set_xlabel("X", fontsize=16)
+    ax.set_ylabel("Y", fontsize=16)
+    ax.set_title(title)
 
-    Parameters
-    ----------
-    grid : np.ndarray
-        Single grid of 0s and 1s.
-    save_plot : bool
-        Whether to save the plot.
-    filename : str
-        The filename to save the plot
+    
+    if file is not None:
+        plt.savefig(file, dpi=600)
 
-    Returns
-    -------
-    None
-    """
-    plt.figure(figsize=(10, 8))
-    plt.imshow(grid, cmap="gray_r", origin="upper", extent=[0, 1, 0, 1])
-    plt.axis("off")
-
-    plt.tight_layout() 
-
-    if save_plot:
-        plt.savefig(file_path, dpi=300)
-        print(f"Plot saved as {file_path}")
-    else:
-        plt.show()
+    if return_ax:
+        return fig, ax
+    plt.show()
 
 def generate_heatmap(all_seed_growth_grids, 
                      title, 
