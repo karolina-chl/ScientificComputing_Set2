@@ -8,6 +8,10 @@
 3. [Contributing](#contributing)
 4. [License](#license)
 
+##  Guide to the repository  
+DLA : \\
+Monte Carlo : \\
+Gray_Scott: to generate and save all the plots run `scripts/script_gray_scott.py` file. The animation will appear, all images will be saved to the results folder. \\
 
 ## Usage and Installation
 To run the simulations and generate plots, follow these steps:
