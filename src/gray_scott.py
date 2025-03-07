@@ -143,14 +143,13 @@ def plot_animation(c):
     heatmap = ax.imshow(c[0], cmap="hot", extent=[0, 1, 0, 1])
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
-    ax.set_title("Equilibrium Diffusion")
 
     cbar = plt.colorbar(heatmap)
     cbar.set_label("Concentration")
 
     def update(frame):
         heatmap.set_array(c[frame]) 
-        ax.set_title(f"Equilibrium Diffusion (frame = {frame})")
+        ax.set_title(f"Gray Scott (frame = {frame})")
         return heatmap,
 
     anim = animation.FuncAnimation(fig, update, frames=range(0, num_steps, frame_steps ), interval=1, blit=False)
