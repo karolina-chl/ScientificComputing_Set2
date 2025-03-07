@@ -21,7 +21,7 @@ def plot_boolean_grid(grid, save_plot, filename):
     -------
     None
     """
-    os.makedirs("results", exist_ok=True)
+    os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
     file_location = os.path.join("results", filename)
 
     plt.figure(figsize=(10, 8))
@@ -56,8 +56,8 @@ def generate_heatmap(all_seed_growth_grids,
     plt.tight_layout() 
 
     if save_plot:
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
 
     plt.show()
@@ -78,8 +78,8 @@ def plot_histogram(data,
     plt.tight_layout() 
     
     if save_plot:
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
 
     plt.show()
@@ -112,8 +112,8 @@ def plot_cross_section_and_deviation(data,
 
     if save_plot:
         plot_file_name = "deviation_" + plot_file_name
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
 
     plt.show()
@@ -128,21 +128,21 @@ def plot_cross_section_and_deviation(data,
 
     if save_plot:
         plot_file_name = "cross_section_" + plot_file_name
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
 
     plt.show()
 
-def plot_cross_section_and_deviation_multiple(sticking_prob_array,
-                            load_file_name,
-                            save_plot=False, 
-                            plot_file_name="flat_histogram.png"):
+def plot_cross_section_and_deviation_multiple(parameter_array,
+                                            load_file_name,
+                                            save_plot=False, 
+                                            plot_file_name="flat_histogram.png"):
     
     plt.figure(figsize=(4,8))
     cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
 
-    for i, sticking_prob in enumerate(sticking_prob_array):
+    for i, sticking_prob in enumerate(parameter_array):
         sticking_prob_str = str(sticking_prob).replace(".", "_")
         data = load_data(load_file_name + str(sticking_prob_str) + "_sp.npy")
         num_runs, _, grid_size = data.shape
@@ -154,7 +154,7 @@ def plot_cross_section_and_deviation_multiple(sticking_prob_array,
         xdiff = np.abs(xs - center)
 
         num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-        plt.plot(num_cells_per_cross, ys, label=str(sticking_prob), color=cmap(i/len(sticking_prob_array)))
+        plt.plot(num_cells_per_cross, ys, label=str(sticking_prob), color=cmap(i/len(parameter_array)))
     
     plt.ylabel('y (cross section)', fontsize=16)
     plt.xlabel('Number of cells', fontsize=16)
@@ -164,8 +164,8 @@ def plot_cross_section_and_deviation_multiple(sticking_prob_array,
 
     if save_plot:
         plot_file_name = "cross_section_" + plot_file_name
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
     
     plt.show()
@@ -190,8 +190,8 @@ def flat_histogram(data,
     plt.tight_layout() 
 
     if save_plot:
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
     
     plt.show()
@@ -223,8 +223,8 @@ def flat_histogram_multiple(sticking_prob_array,
     plt.tight_layout() 
 
     if save_plot:
-        os.makedirs("results", exist_ok=True)
-        save_location = os.path.join("results", plot_file_name)
+        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
+        save_location = os.path.join("results", "monte_carlo")
         plt.savefig(save_location)
     
     plt.show()

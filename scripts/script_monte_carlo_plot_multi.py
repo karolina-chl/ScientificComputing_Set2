@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from src.utils import generate_heatmap, plot_histogram, flat_histogram, plot_cross_section_and_deviation, flat_histogram_multiple, plot_many_runs_experiment_multiple
+from src.utils import generate_heatmap, plot_histogram, flat_histogram, plot_cross_section_and_deviation, flat_histogram_multiple, plot_cross_section_and_deviation_multiple
 
 def generate_save_names(sticking_prob_str):
     return [
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     
     scrpt_plot_monte_carlo_results(sticking_prob)
     
-    plot_many_runs_experiment_multiple([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    plot_cross_section_and_deviation_multiple([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
                                        "final_seed_growth_states_",
                                        save_plot=True, 
                                        plot_file_name="y_cross_sections_all.png")
