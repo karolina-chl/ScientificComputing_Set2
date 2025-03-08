@@ -32,8 +32,8 @@ def compare_DLA_and_monte_carlo_cross_sections(eta, p_s, DLA_array, monte_carlo_
     MC_mabs = mean_abs_diff(monte_carlo_array)
     MC_num_cells_per_cross = np.sum(MC_sum_grid, axis=1) / MC_num_runs
 
-    axs[0].plot(DLA_num_cells_per_cross, DLA_ys, label='$p_s =$ ' + str(p_s))
-    axs[1].plot(DLA_mabs, DLA_ys, label='$p_s =$ ' + str(p_s))
+    axs[0].plot(DLA_num_cells_per_cross, DLA_ys, label='$\eta =$ ' + str(eta))
+    axs[1].plot(DLA_mabs, DLA_ys, label='$\eta =$ ' + str(eta))
 
     axs[0].plot(MC_num_cells_per_cross, MC_ys, label='$p_s =$ ' + str(p_s))
     axs[1].plot(MC_mabs, MC_ys, label='$p_s =$ ' + str(p_s))    
