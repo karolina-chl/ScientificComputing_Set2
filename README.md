@@ -51,15 +51,15 @@ To run the simulations and generate plots, follow these steps:
 
 5. **Run Simulations**: You can run the simulations using either script entry points, general function usage, or by directly modifying and running the source file functions.
 
-    - **Using Script Entry Points**: Use the provided script entry points to run the simulations. The following script entry points run different simulations depending on parameters definied in their script files:
+    - **Using Script Entry Points**: Use the provided script entry points to run different simulations depending on parameters defined in their script files:
 
         ```sh
-        gray_scott_script # Runs a the Gray-Scott model and outputs the result
+        gray_scott # Runs a the Gray-Scott model and outputs the result
         single_run_dla # Runs the single general DLA model and outputs a multi-step growth/diffusion plot
         optimal_omega # Runs an optimal Omega calculation for the DLA model and outputs the result
-        many_runs_hist = "scripts.many_runs_hist:main" # Runs many DLA simulations and outputs the result
-        script_monte_carlo_sim_multi = "scripts.script_monte_carlo_sim_multi:main" # Runs a specified number of Monte Carlo Random Walk DLA simulations for a range of sticking probabilities
-        script_monte_carlo_single = "scripts.script_monte_carlo_single:main" # Runs a single Monte Carlo Random Walk DLA simulation and outputs the results
+        many_runs_hist # Runs many DLA simulations and outputs the result
+        monte_carlo_multi # Runs a specified number of Monte Carlo Random Walk DLA simulations for a range of sticking probabilities
+        script_monte_carlo_single # Runs a single Monte Carlo Random Walk DLA simulation and outputs the results
         ```
 
     - **Using General Function Usage**: Alternatively, you can run the scripts directly. For example, to run a single Monte Carlo simulation, modify and run:
@@ -79,10 +79,11 @@ To run the simulations and generate plots, follow these steps:
 
 6. **Generate Plots**: Some of the scripts separate simulation runs and plotting, and thus you can generate plots using either script entry points, general function usage, or by directly modifying and running the source file functions.
 
-    - **Using Script Entry Points**: Use the provided script entry points to generate plots. For example, to generate a heatmap, use one of the following:
+    - **Using Script Entry Points**: Use the provided script entry points to generate plots depending on parameters defined in their script files:
 
         ```sh
-        script_monte_carlo_plot_multi
+        monte_carlo_plot_multi # Plots a range of statistics for results saved from script_monte_carlo_sim_multi simulations
+        compare_DLA_MC # Plots comparisons between the general DLA and Monte Carlo methods for specified parameters
         ```
 
     - **Using General Function Usage**: Alternatively, you can run the scripts directly. For example, to generate a number of pre-built plots, modify and run:
@@ -121,6 +122,7 @@ The Diffusion Limited Aggregation, Monte Carlo Random Walk, and Gray-Scott model
 - `scripts/single_run_dla.py`: Script to run a single Diffusion Limited Aggregation simulation.
 - `scripts/optimal_omega.py`: Script to find the optimal omega for the Diffusion Limited Aggregation model.
 - `scripts/many_runs_hist.py`: Script to run multiple Diffusion Limited Aggregation simulations and generate histograms.
+- `scripts/script_compare_DLA.py`: Script to plot data comparisons between the general DLA model and the Monte Carlo Model for specified parameters
 
 ## Contributing
 

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from src.monte_carlo import monte_carlo_sim, animate_monte_carlo_sim
 from src.utils import generate_heatmap, plot_grid
 
-def generate_3_by_1_heatmap(results, sticking_prob_str):
+def generate_3_by_1_heatmap(results, sticking_prob_str, successful_walks):
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
     plot_grid(results["successful_seed_growth_grid_states"][25], 
@@ -73,14 +73,21 @@ def main():
                                                             sticking_prob, 
                                                             max_walkers=max_walkers_per_sim)
     
+    animate_monte_carlo_sim(results["seed_growth_grid_states"],
+                            results["walker_final_states"], 
+                            grid_size, 
+                            save_animation=False, 
+                            filename="monte_carlo_animation_all.mp4", 
+                            animation_speed=500)
+
     animate_monte_carlo_sim(results["successful_seed_growth_grid_states"], 
                             results["successful_walker_final_states"], 
                             grid_size,
                             save_animation=False,
-                            filename="monte_carlo_animation.mp4", 
+                            filename="monte_carlo_animation_only_successes.mp4", 
                             animation_speed=500)
     
-    generate_3_by_1_heatmap(results, sticking_prob_str)
+    generate_3_by_1_heatmap(results, sticking_prob_str, successful_walks)
         
     generate_multiple_heatmaps(results, sticking_prob_str)
 

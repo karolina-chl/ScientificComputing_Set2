@@ -345,7 +345,6 @@ def plot_y_slice_density_multiple(parameter_array, array_of_arrays, save_plot=Fa
 
     plt.show()
 
-
 """
 Save/Load npy files
 """
