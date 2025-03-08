@@ -49,21 +49,56 @@ To run the simulations and generate plots, follow these steps:
     pip install -e .
     ```
 
-5. **Run Simulations**: Use the provided scripts to run the simulations. For example, to run a single Monte Carlo simulation, modify and run:
+5. **Run Simulations**: You can run the simulations using either script entry points, general function usage, or by directly modifying and running the source file functions.
 
-    ```sh
-    python scripts/script_monte_carlo_single.py
-    ```
+    - **Using Script Entry Points**: Use the provided script entry points to run the simulations. The following script entry points run different simulations depending on parameters definied in their script files:
 
-6. **Generate Plots**: Use the provided utility functions to generate plots from the simulation results. For example:
+        ```sh
+        gray_scott_script # Runs a the Gray-Scott model and outputs the result
+        single_run_dla # Runs the single general DLA model and outputs a multi-step growth/diffusion plot
+        optimal_omega # Runs an optimal Omega calculation for the DLA model and outputs the result
+        many_runs_hist = "scripts.many_runs_hist:main" # Runs many DLA simulations and outputs the result
+        script_monte_carlo_sim_multi = "scripts.script_monte_carlo_sim_multi:main" # Runs a specified number of Monte Carlo Random Walk DLA simulations for a range of sticking probabilities
+        script_monte_carlo_single = "scripts.script_monte_carlo_single:main" # Runs a single Monte Carlo Random Walk DLA simulation and outputs the results
+        ```
 
-    ```python
-    from src.utils import generate_heatmap, plot_histogram
+    - **Using General Function Usage**: Alternatively, you can run the scripts directly. For example, to run a single Monte Carlo simulation, modify and run:
 
-    # Example usage
-    generate_heatmap(data, "Title", "Colorbar Label", save_plot=True, plot_file_name="heatmap.png")
-    plot_histogram(data, "Title", "X Label", "Y Label", save_plot=True, plot_file_name="histogram.png")
-    ```
+        ```sh
+        python scripts/script_monte_carlo_single.py
+        ```
+
+    - **Directly Modifying and Running Source File Functions**: You can also directly modify and run the functions in the source files. For example, to run a single Monte Carlo simulation, modify and run:
+
+        ```python
+        from src.monte_carlo import run_single_simulation
+
+        # Modify parameters as needed
+        run_single_simulation(parameters)
+        ```
+
+6. **Generate Plots**: Some of the scripts separate simulation runs and plotting, and thus you can generate plots using either script entry points, general function usage, or by directly modifying and running the source file functions.
+
+    - **Using Script Entry Points**: Use the provided script entry points to generate plots. For example, to generate a heatmap, use one of the following:
+
+        ```sh
+        script_monte_carlo_plot_multi
+        ```
+
+    - **Using General Function Usage**: Alternatively, you can run the scripts directly. For example, to generate a number of pre-built plots, modify and run:
+
+        ```sh
+        python scripts/script_monte_carlo_plot_multi.py
+        ```
+
+    - **Directly Modifying and Running Source File Functions**: You can also directly modify and run the functions in the source files. For example, to generate a heatmap, modify and run:
+
+        ```python
+        from src.utils import generate_heatmap
+
+        # Modify parameters as needed
+        generate_heatmap(data, "Title", "Colorbar Label", save_plot=True, plot_file_name="heatmap.png")
+        ```
 
 ## Implementation
 

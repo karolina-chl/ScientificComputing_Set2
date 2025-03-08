@@ -36,7 +36,11 @@ def plot_single_run_with_eta(etas):
     fig.tight_layout()
     plt.savefig(os.path.join('results', 'diffusion_limited_aggregation', 'run_with_eta_{}.png'.format('_'.join(map(str, etas)))), dpi=600)
     plt.show()
+
+
+def main():
+    plot_single_run_with_eta([0.5, 1, 2])
         
         
 if __name__ == '__main__':
-    plot_single_run_with_eta([0.5, 1, 2])
+    main()

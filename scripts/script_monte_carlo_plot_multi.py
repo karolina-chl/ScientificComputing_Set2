@@ -142,8 +142,8 @@ def plot_mont_carlo_sp_range(sticking_prob_array):
                                   save_plot=True, 
                                   file_path=os.path.join("results", "monte_carlo", "y_slice_density_all.png"))
 
-if __name__ == "__main__":
 
+def main():
     """
     Plot single sticking probability results
     """
@@ -157,3 +157,7 @@ if __name__ == "__main__":
     sticking_prob_array = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
 
     plot_mont_carlo_sp_range(sticking_prob_array)
+
+if __name__ == "__main__":
+    main()
+    

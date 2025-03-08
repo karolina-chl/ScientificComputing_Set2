@@ -88,8 +88,8 @@ def parallel_non_conv(etas):
     with concurrent.futures.ProcessPoolExecutor() as executor:
         future_f = [executor.submit(non_conv_experiment, eta, os.path.join('data', 'opt_omega')) for eta in etas]
 
-if __name__ == '__main__':
-    
+
+def main():
     # non_conv_experiment()
     etas = [0, 0.125, 0.5, 1, 2, 8]
     parallel_non_conv(etas)
@@ -104,3 +104,7 @@ if __name__ == '__main__':
     
     plt.plot(etas, w_min)
     plt.show()
+
+if __name__ == '__main__':
+    main()
+    

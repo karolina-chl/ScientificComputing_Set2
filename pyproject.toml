@@ -27,4 +27,10 @@ dependencies = [
 Home = "https://github.com/karolina-chl/ScientificComputing_Set2"
 
 [project.scripts]
-gray_scott_script = "scripts:script_gray_scott.py"
+gray_scott_script = "scripts.script_gray_scott:main"
+single_run_dla = "scripts.single_run_dla:main"
+optimal_omega = "scripts.optimal_omega:main"
+many_runs_hist = "scripts.many_runs_hist:main"
+script_monte_carlo_sim_multi = "scripts.script_monte_carlo_sim_multi:main"
+script_monte_carlo_plot_multi = "scripts.script_monte_carlo_plot_multi:main"
+script_monte_carlo_single = "scripts.script_monte_carlo_single:main"

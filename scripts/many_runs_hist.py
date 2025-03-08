@@ -78,8 +78,8 @@ def plot_many_runs_experiment(file, skip_ends=1):
     plt.legend()
     plt.show()
     
-        
-if __name__ == '__main__':
+
+def main():
     #many_runs_experiment(100, 1, 1.8)
     plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_1.npy'))
     
@@ -118,3 +118,6 @@ if __name__ == '__main__':
                                               parameter_name=r'$\eta$',
                                               save_plot=True, 
                                               file_path=os.path.join('results', 'diffusion_limited_aggregation', 'cross_section_and_deviation_all.png'))
+        
+if __name__ == '__main__':
+    main()

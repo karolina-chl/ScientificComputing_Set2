@@ -56,7 +56,7 @@ def generate_multiple_heatmaps(results, sticking_prob_str):
                      save_plot=True,
                      file_path=os.path.join("results", "monte_carlo","heatmap_successful_walker_final_states" + sticking_prob_str + ".png"))
 
-if __name__ == "__main__":
+def main():
     grid_size = 101
     sticking_prob = 1.0
     max_walkers_per_sim = 250000
@@ -83,3 +83,6 @@ if __name__ == "__main__":
     generate_3_by_1_heatmap(results, sticking_prob_str)
         
     generate_multiple_heatmaps(results, sticking_prob_str)
+
+if __name__ == "__main__":
+    main()
