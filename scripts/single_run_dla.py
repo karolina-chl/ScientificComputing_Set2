@@ -8,6 +8,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def plot_single_run_with_eta(etas):
+    """
+    simulates and plots the growth and nutrient concentration after reaching the top for 3 different parameter choices of eta
+    params:
+        etas: length-3 array containing 3 eta values
+        
+    returns:
+        plot of the growth cluster / concentration
+    """  
     
     fig, axs = plt.subplots(1,3,sharey=True, figsize=[15,5]) 
     for i, eta in enumerate(etas):

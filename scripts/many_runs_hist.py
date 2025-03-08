@@ -9,6 +9,16 @@ import matplotlib.pyplot as plt
 
 
 def many_runs_experiment(num_runs = 10, eta =2, omega = 1.85):
+    """
+    simulates a number of runs of the dla model, saving the final growth after reaching the top
+    params:
+        num_runs:   num_runs
+        eta:        dla model parameter
+        omega:      finite difference solver parameter
+        
+    returns:
+        final grids saved as a numpy array
+    """  
     np.random.seed(43)
     set_numba_seed(np.random.randint(1000000000))
     grid_size = 100
@@ -23,14 +33,22 @@ def many_runs_experiment(num_runs = 10, eta =2, omega = 1.85):
         final_grids[run] = g[num_iter]
         
     np.save('../data/many_runs_eta_{}'.format(eta), final_grids)
-    # plot_grid(c[-1], g[-1])
-
-
-    # plot_animation(c[:num_iter], g[:num_iter])
     
     
 
 def plot_many_runs_experiment(file, skip_ends=1):
+    """
+    plot the histogram of cell occupancy for a timeseries of dla runs with one constant set of parameters
+    params:
+        file:   location where the list of grids is stored
+        skip_ends: ignore the first / last n rows of the grid
+        
+        
+    returns:
+        histogram of cell occupancy
+        mean / mean abs difference from centerline plot
+        mean number of cells in each row plot
+    """  
     grids = np.load(file)
     mean_abs_diff(grids)
     plt.show()
@@ -70,19 +88,6 @@ def plot_many_runs_experiment(file, skip_ends=1):
 
     
     
-    
-    
-def flat_histogram(file):    
-    grids = np.load(file)
-    num_runs, _, grid_size = grids.shape
-    sum_grid = np.sum(grids, axis=0).reshape([-1]) / num_runs
-    hist, bins = np.histogram(sum_grid, np.linspace(0,1,20))
-    
-    print(np.sum(grids) / num_runs)
-    plt.bar(bins[:-1], hist, width=0.05)
-    plt.yscale('log')
-    
-    plt.show()
         
 if __name__ == '__main__':
     # many_runs_experiment(100, 1, 1.8)
@@ -91,19 +96,21 @@ if __name__ == '__main__':
     
     # flat_histogram('../data/many_runs_eta_4.npy')
     
-    # plot_many_runs_experiment('../data/many_runs_eta_0.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_1.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_2.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_4.0.npy')
     
     # many_runs_experiment(100, 0.5, 1.8)
     # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
     
     
-    
+    #run the experiments from the shell file
     # eta = float(sys.argv[1])
     # many_runs_experiment(1000,eta, 1.85)
+    
+    # visualize the data
+    # plot_many_runs_experiment('../data/many_runs_eta_0.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_1.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_2.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_4.0.npy')
     
     
     #analyze data of the many runs experiment
