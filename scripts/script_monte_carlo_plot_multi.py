@@ -11,7 +11,8 @@ from src.utils import (
     plot_single_y_slice_density, 
     flat_histogram_multiple, 
     plot_cross_section_and_deviation_multiple, 
-    plot_y_slice_density_multiple
+    plot_y_slice_density_multiple,
+    plot_line
 )
 
 def generate_save_names(sticking_prob_str):
@@ -31,6 +32,11 @@ def plot_monte_carlo_sp_single(sticking_prob):
     save_names = generate_save_names(sticking_prob_str)
 
     final_seed_growth_states, all_walk_counts, all_successful_walks, all_avg_walk_lengths, all_avg_successful_walk_lengths = load_data_files(save_names)
+
+    print("Average number of successful walks: ", np.mean(all_successful_walks))
+    print("Average number of walks: ", np.mean(all_walk_counts))
+    print("Average average walk length: ", np.mean(all_avg_walk_lengths))
+    print("Average average successful walk length: ", np.mean(all_avg_successful_walk_lengths))
 
     generate_heatmap(final_seed_growth_states, 
                      "Final seed growth states", 
@@ -80,7 +86,42 @@ def plot_monte_carlo_sp_single(sticking_prob):
 def plot_mont_carlo_sp_range(sticking_prob_array):
     data_array = [load_data("final_seed_growth_states_" + str(str(sticking_prob).replace(".", "_")) + "_sp.npy") for sticking_prob in sticking_prob_array]
 
+    average_successful_walks = [np.mean(load_data("all_successful_walks_" + str(str(sticking_prob).replace(".", "_")) + "_sp.npy")) for sticking_prob in sticking_prob_array]
+    average_walk_counts = [np.mean(load_data("all_walk_counts_" + str(str(sticking_prob).replace(".", "_")) + "_sp.npy")) for sticking_prob in sticking_prob_array]
+    average_avg_walk_lengths = [np.mean(load_data("all_avg_walk_lengths_" + str(str(sticking_prob).replace(".", "_")) + "_sp.npy")) for sticking_prob in sticking_prob_array]
+    average_avg_successful_walk_lengths = [np.mean(load_data("all_avg_successful_walk_lengths_" + str(str(sticking_prob).replace(".", "_")) + "_sp.npy")) for sticking_prob in sticking_prob_array]
     
+    plot_line(sticking_prob_array,
+              average_successful_walks,
+              "Average number of successful walks",
+              "Sticking probability",
+              "Number of successful walks",
+              save_plot=True, 
+              file_path=os.path.join("results", "monte_carlo", "average_successful_walks_line.png"))
+    
+    plot_line(sticking_prob_array,
+              average_walk_counts,
+              "Average number of walks",
+              "Sticking probability",
+              "Number of walks",
+              save_plot=True, 
+              file_path=os.path.join("results", "monte_carlo", "average_walk_counts_line.png"))
+    
+    plot_line(sticking_prob_array,
+              average_avg_walk_lengths,
+              "Average average walk length",
+              "Sticking probability",
+              "Average walk length",
+              save_plot=True, 
+              file_path=os.path.join("results", "monte_carlo", "average_avg_walk_lengths_line.png"))
+    
+    plot_line(sticking_prob_array,
+              average_avg_successful_walk_lengths,
+              "Average average successful walk length",
+              "Sticking probability",
+              "Average successful walk length",
+              save_plot=True, 
+              file_path=os.path.join("results", "monte_carlo", "average_avg_successful_walk_lengths_line.png"))
 
     plot_cross_section_and_deviation_multiple(sticking_prob_array,
                                               data_array,

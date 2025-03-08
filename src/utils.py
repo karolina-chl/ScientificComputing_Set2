@@ -59,6 +59,28 @@ def generate_heatmap(all_seed_growth_grids,
 
     plt.show()
 
+def plot_line(parameter_array,
+              array_of_data,
+              title, 
+              xlabel, 
+              ylabel, 
+              save_plot=False, 
+              file_path="line_plot.png"):
+    plt.figure(figsize=(8, 4))
+    plt.plot(parameter_array, array_of_data, marker='o')
+    #plt.title(title)
+    plt.xlabel(xlabel, fontsize=16)
+    plt.ylabel(ylabel, fontsize=16)
+    #plt.xscale('log')
+    #plt.yscale('log')
+
+    plt.tight_layout() 
+
+    if save_plot:
+        plt.savefig(file_path)
+
+    plt.show()
+
 def plot_histogram(data, 
                    title, 
                    xlabel, 
