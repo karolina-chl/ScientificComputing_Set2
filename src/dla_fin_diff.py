@@ -3,8 +3,15 @@ from finite_difference import *
 from utils import *
 
 def neighbors_grid(g):
-    grid_size = g.shape[-1]
-    
+    """
+    given a boolean grid of live/ dead cells, compute a boolean grid where all neighboring points of live cells are highlighted.
+    Uses 4 views of the array shifted by one position, so should be fairly fast even without jit.
+    params:
+        g:      grid of live cells at one timestep [grid_size x grid_size]
+        
+    returns:
+        neighbors: grid of cells that are neighbors of the live cell cluster [grid_size x grid_size]
+    """        
     top = np.roll(g, 1, axis=0)
     down = np.roll(g, -1, axis=0)
     left = np.roll(g, 1, axis=1)
@@ -14,6 +21,9 @@ def neighbors_grid(g):
 
 @njit
 def set_numba_seed(seed):
+    """
+    To set the seed for calls to np.random inside numba jit, the seed also needs to be set inside a jit function
+    """
     np.random.seed(seed)
 
 @njit
@@ -111,27 +121,3 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     
     return g, c, t, total_sor_iter
 
-
-if __name__ == '__main__':
-    #example usage:
-    np.random.seed(42)
-    set_numba_seed(np.random.randint(1000000000))
-    grid_size = 100
-    initial_cond = np.zeros([grid_size, grid_size])
-    initial_cond[-2, grid_size//2] = 1
-    # plot_grid(initial_cond)
-                    
-    eta =1
-    omega = 1.85
-    diffusion_tol = 1e-4
-    
-    g, c , num_iter, total_sor_iter= dla_growth(eta, omega, initial_cond, growth_steps=10000, diffusion_tolerance=diffusion_tol)
-        
-    plot_grid(c[num_iter-1], g[num_iter-1], file='../results/diffusion_limited_aggregation/run_with_eta_{}.png'.format(eta), title=r'$\eta={}$'.format(eta), make_cbar=True)
-    print(total_sor_iter)
-    
-
-    plot_animation(c[:num_iter], g[:num_iter])
-        
-        
-    

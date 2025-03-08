@@ -60,6 +60,15 @@ def plot_animation(c, g = None, frame_steps=1):
     
     
 def mean_abs_diff(grids):
+    """computes the mean absolute difference from the center line for all rows of a time series of boolean grids 
+    
+    params:
+        grids:      time series of boolean grid [num_steps x grid_size x grid_size]
+
+    returns:
+        mean_abs_diff: |x - 1/2| at each horizontal cross-section [grid_size]
+
+    """
     num_runs, _, grid_size = grids.shape
     x_ind = np.array(range(grid_size))
     xdiff = np.abs(x_ind - grid_size//2)
@@ -82,6 +91,19 @@ def plot_cross_section_and_deviation_multiple(parameter_array,
                                             parameter_name=r'$p_c$',
                                             save_plot=False, 
                                             plot_file = "results/monte_carlo/cross_section_plot.png"):
+    """plots the number of live cells and mean abs deviation from the starting location of a set of DLA grids.
+    one model parameter can be varied where for each parameter value a line will be drawn.    
+    params:
+        parameter_array:      1d array of the varied parameter values
+        load_file_name:       location of stored experimental data
+        comma_separator, load_file_ending: file naming convention
+        parameter_name:       title of the varied parameter (latex)
+        save_plot, plot_file: location for storing the plot image
+
+    returns:
+        nothing
+
+    """
     
     fig, axs = plt.subplots(1, 2,sharey=True, figsize=(8,8))
     cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors

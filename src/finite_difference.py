@@ -2,10 +2,6 @@ import numpy as np
 from numba import jit, njit, prange
 
 
-
-
-
-
 @njit
 def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None, adaptive=True):
     """SOR finite difference method for time-independent diffusion
@@ -16,6 +12,7 @@ def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None, adaptive
         mask:       grid of sinks shape [grid_size x grid_size]
         mask:       grid of sinks shape [grid_size x grid_size]
         tolerance:  stop when changes between iterations are smaller than tolerance
+        adaptive:   specify whether omega should be adjusted when the method starts to become unstable
 
     returns:
         c:      modified grid c
