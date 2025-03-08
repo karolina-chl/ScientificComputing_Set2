@@ -84,7 +84,7 @@ def mean_abs_diff(grids):
 """
     Should work for arbitrary grids, hopefully default params are still working with MC
 """
-def plot_cross_section_and_deviation_multiple(parameter_array,
+def plot_cross_section_and_deviation_multiple_dla(parameter_array,
                                             load_file_name,
                                             comma_separator='_',
                                             load_file_ending='_sp.npy',
@@ -132,6 +132,10 @@ def plot_cross_section_and_deviation_multiple(parameter_array,
     axs[0].set_xlabel(r'$\langle N_y \rangle$', fontsize=16)
     axs[1].set_xlabel(r'$\langle |x - x_c|\rangle$', fontsize=16)
     axs[0].legend(title=parameter_name, loc=4)
+    fig.tight_layout()
+    if save_plot:
+        plt.savefig(plot_file, dpi=600)
+    plt.show()
 
 
 def generate_heatmap(all_seed_growth_grids, 
@@ -322,7 +326,7 @@ def flat_histogram_multiple(sticking_prob_array,
     plt.tight_layout() 
 
     if save_plot:
-        plt.savefig(plot_file, dpi=600)
+        plt.savefig(plot_file_name, dpi=600)
 
 """
 Save/Load npy files

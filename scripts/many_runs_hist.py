@@ -90,32 +90,16 @@ def plot_many_runs_experiment(file, skip_ends=1):
     
         
 if __name__ == '__main__':
-    # many_runs_experiment(100, 1, 1.8)
-    # plot_many_runs_experiment('../data/many_runs_eta_1.npy')
-    
-    
-    # flat_histogram('../data/many_runs_eta_4.npy')
-    
-    
-    # many_runs_experiment(100, 0.5, 1.8)
-    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
-    
+      
     
     #run the experiments from the shell file
-    # eta = float(sys.argv[1])
-    # many_runs_experiment(1000,eta, 1.85)
-    
-    # visualize the data
-    # plot_many_runs_experiment('../data/many_runs_eta_0.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_1.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_2.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_4.0.npy')
-    
-    
-    #analyze data of the many runs experiment
-    etas = [0., 0.125, 0.5, 1., 2., 4.]
-    plot_cross_section_and_deviation_multiple(etas, 
+    if len(sys.argv) >1:
+        eta = float(sys.argv[1])
+        many_runs_experiment(1000,eta, 1.85)
+    else:
+        #analyze data of the many runs experiment
+        etas = [0., 0.125, 0.5, 1., 2., 4.]
+        plot_cross_section_and_deviation_multiple_dla(etas, 
                                               load_file_name='../data/many_runs_eta_', 
                                               comma_separator='.', 
                                               load_file_ending='.npy', 
