@@ -28,17 +28,6 @@ def many_runs_experiment(num_runs = 10, eta =2, omega = 1.85):
 
     # plot_animation(c[:num_iter], g[:num_iter])
     
-def mean_abs_diff(grids):
-    num_runs, _, grid_size = grids.shape
-    x_ind = np.array(range(grid_size))
-    xdiff = np.abs(x_ind - grid_size//2)
-    diff_grids = xdiff[None, None, :] * grids
-    sum_abs_diff = np.sum(diff_grids, axis=-1)
-    Ny = np.sum(grids, axis=-1)
-    
-    mean_abs_diff = np.mean(sum_abs_diff / Ny, axis=0)
-    
-    return mean_abs_diff
     
 
 def plot_many_runs_experiment(file, skip_ends=1):
@@ -76,6 +65,13 @@ def plot_many_runs_experiment(file, skip_ends=1):
     plt.legend()
     plt.show()
     
+    
+    
+
+    
+    
+    
+    
 def flat_histogram(file):    
     grids = np.load(file)
     num_runs, _, grid_size = grids.shape
@@ -92,16 +88,30 @@ if __name__ == '__main__':
     # many_runs_experiment(100, 1, 1.8)
     # plot_many_runs_experiment('../data/many_runs_eta_1.npy')
     
+    
     # flat_histogram('../data/many_runs_eta_4.npy')
     
-    plot_many_runs_experiment('../data/many_runs_eta_0.0.npy')
-    plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
-    plot_many_runs_experiment('../data/many_runs_eta_1.0.npy')
-    plot_many_runs_experiment('../data/many_runs_eta_2.0.npy')
-    plot_many_runs_experiment('../data/many_runs_eta_4.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_0.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_1.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_2.0.npy')
+    # plot_many_runs_experiment('../data/many_runs_eta_4.0.npy')
     
     # many_runs_experiment(100, 0.5, 1.8)
     # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
     
+    
+    
     # eta = float(sys.argv[1])
     # many_runs_experiment(1000,eta, 1.85)
+    
+    
+    #analyze data of the many runs experiment
+    etas = [0., 0.125, 0.5, 1., 2., 4.]
+    plot_cross_section_and_deviation_multiple(etas, 
+                                              load_file_name='../data/many_runs_eta_', 
+                                              comma_separator='.', 
+                                              load_file_ending='.npy', 
+                                              parameter_name=r'$\eta$', 
+                                              save_plot=True, 
+                                              plot_file='../results/diffusion_limited_aggregation/cross_section_plot.png')
