@@ -125,6 +125,7 @@ def plot_mont_carlo_sp_range(sticking_prob_array):
 
     plot_cross_section_and_deviation_multiple(sticking_prob_array,
                                               data_array,
+                                              parameter_name="$p_s$",
                                               save_plot=True, 
                                               file_path=os.path.join("results", "monte_carlo", "cross_section_and_deviation_all.png"))
     

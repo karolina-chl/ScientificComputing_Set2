@@ -25,3 +25,6 @@ dependencies = [
 
 [project.urls]
 Home = "https://github.com/karolina-chl/ScientificComputing_Set2"
+
+[project.scripts]
+gray_scott_script = "scripts:script_gray_scott.py"

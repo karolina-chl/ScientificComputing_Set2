@@ -1,0 +1,1 @@
+parallel --lb -a many_runs_args.txt python many_runs_hist.py

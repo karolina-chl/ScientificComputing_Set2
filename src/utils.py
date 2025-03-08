@@ -1,16 +1,13 @@
 import os
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import numpy as np
 
 from matplotlib.cm import get_cmap
 
-
-"""
-Plots Should be universal
-"""
 def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=None ):
     
-    #plt.tight_layout()
+    # plt.tight_layout()
     
     grid_size = c.shape[-1]
     return_ax = True
@@ -23,6 +20,7 @@ def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=
         cbar.set_label("Concentration")
     if growth is not None:      
         heatmap = ax.imshow(growth, alpha=growth, cmap='tab20b',  extent=[0, 1, 0, 1])
+
     ax.set_xlabel("X", fontsize=16)
     ax.set_ylabel("Y", fontsize=16)
     ax.set_title(title)
@@ -34,6 +32,93 @@ def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=
     if return_ax:
         return fig, ax
     plt.show()
+
+def plot_animation(c, g = None, frame_steps=1):
+    num_steps = c.shape[0]
+    fig, ax = plt.subplots()
+    heatmap = ax.imshow(c[0], cmap="hot", extent=[0, 1, 0, 1])
+    if g is not None:
+        growthmap = ax.imshow(g[0], alpha=g[0], cmap='tab20b',  extent=[0, 1, 0, 1])
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_title("Equilibrium Diffusion")
+
+    cbar = plt.colorbar(heatmap)
+    cbar.set_label("Concentration")
+
+    def update(frame):
+        heatmap.set_array(c[frame]) 
+        if g is not None:
+            growthmap.set_array(g[frame])
+            growthmap.set_alpha(g[frame])
+        ax.set_title(f"Equilibrium Diffusion (frame = {frame})")
+        return heatmap,
+
+    ani = animation.FuncAnimation(fig, update, frames=range(0, num_steps, frame_steps ), interval=50, blit=False)
+    plt.show()
+    
+    
+    
+def mean_abs_diff(grids):
+    """computes the mean absolute difference from the center line for all rows of a time series of boolean grids 
+    
+    params:
+        grids:      time series of boolean grid [num_steps x grid_size x grid_size]
+
+    returns:
+        mean_abs_diff: |x - 1/2| at each horizontal cross-section [grid_size]
+
+    """
+    num_runs, _, grid_size = grids.shape
+    x_ind = np.array(range(grid_size))
+    xdiff = np.abs(x_ind - grid_size//2)
+    diff_grids = xdiff[None, None, :] * grids
+    sum_abs_diff = np.sum(diff_grids, axis=-1)
+    Ny = np.sum(grids, axis=-1)
+    
+    mean_abs_diff = np.mean(sum_abs_diff / Ny, axis=0)
+    mean_abs_diff /= grid_size
+    
+    return mean_abs_diff
+
+def plot_cross_section_and_deviation_multiple(parameter_array,
+                                              array_of_arrays,
+                                              parameter_name=r'$p_c$',
+                                              save_plot=False, 
+                                              file_path="y_cross_section_multi.png"):
+    
+    fig, axs = plt.subplots(1, 2,sharey=True, figsize=(8,8))
+    cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
+    
+    for parameter, data in zip(parameter_array, array_of_arrays):
+
+        num_runs, _, grid_size = data.shape
+
+        sum_grid = np.sum(data, axis=0)
+        ys = np.linspace(1,0,grid_size)
+        # xs = ys.copy()
+        # center = xs[grid_size//2]
+        
+        mabs = mean_abs_diff(data)
+
+        num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
+        axs[0].plot(num_cells_per_cross, ys, label=str(parameter), color=cmap(parameter/max(parameter_array)))
+        axs[1].plot(mabs, ys, label=str(parameter), color=cmap(parameter/max(parameter_array)))
+    
+    axs[0].set_ylabel('y', fontsize=16)
+    axs[0].grid()
+    axs[1].grid()
+    axs[0].set_xlabel(r'$\langle N_y \rangle$', fontsize=16)
+    axs[1].set_xlabel(r'$\langle |x - x_c|\rangle$', fontsize=16)
+    axs[0].legend(title=parameter_name, loc=4)
+
+    plt.tight_layout() 
+
+    if save_plot:
+        plt.savefig(file_path)
+
+    plt.show()
+
 
 def generate_heatmap(all_seed_growth_grids, 
                      title, 
@@ -171,37 +256,6 @@ def flat_histogram(data,
     plt.xlabel(xlabel, fontsize=16)
     plt.ylabel(ylabel, fontsize=16)
     plt.yscale('log')
-
-    plt.tight_layout() 
-
-    if save_plot:
-        plt.savefig(file_path)
-    
-    plt.show()
-
-
-def plot_cross_section_and_deviation_multiple(parameter_array,
-                                              array_of_arrays,
-                                              save_plot=False, 
-                                              file_path="y_cross_section_multi.png"):
-    plt.figure(figsize=(4,8))
-    cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
-
-    for parameter, data in zip(parameter_array, array_of_arrays):
-        num_runs, _, grid_size = data.shape
-
-        sum_grid = np.sum(data, axis=0)
-        ys = np.linspace(0,1,grid_size)
-        xs = ys.copy()
-        center = xs[grid_size//2]
-        xdiff = np.abs(xs - center)
-
-        num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-        plt.plot(num_cells_per_cross, ys, label=str(parameter), color=cmap(parameter/max(parameter_array)))
-    
-    plt.ylabel('y (cross section)', fontsize=16)
-    plt.xlabel('Number of cells', fontsize=16)
-    plt.legend()
 
     plt.tight_layout() 
 
