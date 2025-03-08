@@ -50,9 +50,6 @@ def plot_many_runs_experiment(file, skip_ends=1):
         mean number of cells in each row plot
     """  
     grids = np.load(file)
-    mean_abs_diff(grids)
-    plt.show()
-    # plot_grid(np.mean(grids, axis=0), file=file.replace('data', 'results/diffusion_limited_aggregation').replace('npy', 'png'), title=r'$\eta = 2$')
     num_runs, _, grid_size = grids.shape
     sum_grid = np.sum(grids, axis=0)
     ys = np.linspace(0,1,grid_size)
@@ -67,16 +64,6 @@ def plot_many_runs_experiment(file, skip_ends=1):
     plt.show()
     
     num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-    # plt.plot(ys, xdiff)
-    # mabs = np.sum(xdiff[None, :]*sum_grid/num_runs, axis=1) / num_cells_per_cross[:,None]
-    # plt.imshow(xdiff[None, :]*sum_grid)
-    # mean = np.sum(xs[None, :]*sum_grid/np.sum(sum_grid, axis=1)[:,None], axis=1)
-    # print(mean)
-    # print(msqd)
-    # plt.plot(ys[skip_ends:-skip_ends], mabs[skip_ends:-skip_ends], label='$|x-<x>|$')
-    # plt.plot(ys[skip_ends:-skip_ends], mean[skip_ends:-skip_ends], label='<x>')
-    # plt.legend()
-    # plt.show()
     mabs = mean_abs_diff(grids)
     plt.plot(ys[:-skip_ends], num_cells_per_cross[:-skip_ends], label='$N_y$')
     plt.plot(ys[:-skip_ends], mabs[:-skip_ends], label=r'$\langle|x-x_c|\rangle$')
