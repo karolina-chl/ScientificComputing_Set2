@@ -7,7 +7,7 @@ from numba import jit, njit, prange
 
 
 @njit
-def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None):
+def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None, adaptive=True):
     """SOR finite difference method for time-independent diffusion
     
     params:
@@ -54,13 +54,16 @@ def SOR_top_down(c,omega, max_steps=100000, mask=None, tolerance= None):
         if tolerance is not None:
             eps_prev = eps
             eps = np.max(np.abs(c - c_old))
-            if eps > eps_prev:
-                omega = omega-0.05
+            if adaptive and eps > eps_prev:
+                omega = omega-0.01
+                continue
                 # print('reduced omega to ', omega)
             if eps < tolerance:
                 break
         c, c_old = c_old, c
 
     return c, t, eps
+
+
 
 

@@ -57,7 +57,7 @@ def grow_g(g, p_g, neighbors):
     assert(False)
 
 
-def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_tolerance=1e-4, verbose=True):    
+def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_tolerance=1e-4, adaptive_SOR=True, verbose=True):    
     """Diffusion Limited Aggregation model with a uniform source at top and sink at the bottom
     The nutrient concentration is computed using the finite difference Successive over-relaxation (SOR) method
     The simulation is always stopped when the top row is reached
@@ -67,6 +67,7 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
         initial_condition:  grid of initial live cells [grid_size x grid_size], live=1
         growth_steps:       number of cells to grow / number of DLA iterations
         diffusion_tolerance:stop SOR when changes between iterations are smaller than tolerance
+        adaptive_SOR:       decide if omega is automatically reduced, if False, SOR can become unstable
         verbose:            decide if progress bar should be printed to stdout
         
     returns:
@@ -81,6 +82,8 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     g = np.zeros_like(c)
     g[0] = initial_condition
     neighbors = neighbors_grid(g[0])
+    basic_gradient = np.linspace(1,0,grid_size)
+    c[0] = basic_gradient[:, None]
     c[0], sor_iter,_ = SOR_top_down(c[0], omega, tolerance=diffusion_tolerance, mask=1-g[0])
     total_sor_iter = sor_iter
     for t in range(0, growth_steps-1):
@@ -88,7 +91,7 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
         if verbose and (t%(growth_steps//100)==0):
             print('.', end='', flush=True)
         
-        c[t+1], sor_iter, sor_tol = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t])
+        c[t+1], sor_iter, sor_tol = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t], adaptive=adaptive_SOR)
         total_sor_iter += sor_iter
         # with high omega we sometimes see negative / very small concentrations
         c[t+1][c[t+1] < diffusion_tolerance] = 0
