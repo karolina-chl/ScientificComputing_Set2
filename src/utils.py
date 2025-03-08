@@ -10,7 +10,7 @@ Plots Should be universal
 """
 def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=None ):
     
-    plt.tight_layout()
+    #plt.tight_layout()
     
     grid_size = c.shape[-1]
     return_ax = True
@@ -158,19 +158,14 @@ def flat_histogram(data,
     plt.show()
 
 
-"""
-    Plots only for Monte Carlo Currently
-"""
 def plot_cross_section_and_deviation_multiple(parameter_array,
-                                            load_file_name,
-                                            save_plot=False, 
-                                            plot_file_name="flat_histogram.png"):
+                                              array_of_arrays,
+                                              save_plot=False, 
+                                              file_path="y_cross_section_multi.png"):
     plt.figure(figsize=(4,8))
     cmap = get_cmap('magma')  # Use a colormap with easily distinguishable colors
 
-    for i, sticking_prob in enumerate(parameter_array):
-        sticking_prob_str = str(sticking_prob).replace(".", "_")
-        data = load_data(load_file_name + str(sticking_prob_str) + "_sp.npy")
+    for parameter, data in zip(parameter_array, array_of_arrays):
         num_runs, _, grid_size = data.shape
 
         sum_grid = np.sum(data, axis=0)
@@ -180,7 +175,7 @@ def plot_cross_section_and_deviation_multiple(parameter_array,
         xdiff = np.abs(xs - center)
 
         num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-        plt.plot(num_cells_per_cross, ys, label=str(sticking_prob), color=cmap(i/len(parameter_array)))
+        plt.plot(num_cells_per_cross, ys, label=str(parameter), color=cmap(parameter/max(parameter_array)))
     
     plt.ylabel('y (cross section)', fontsize=16)
     plt.xlabel('Number of cells', fontsize=16)
@@ -189,30 +184,25 @@ def plot_cross_section_and_deviation_multiple(parameter_array,
     plt.tight_layout() 
 
     if save_plot:
-        plot_file_name = "cross_section_" + plot_file_name
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
+        plt.savefig(file_path)
     
     plt.show()
 
-def flat_histogram_multiple(sticking_prob_array,
+def flat_histogram_multiple(parameter_array,
+                            array_of_arrays,
                             title, 
                             xlabel, 
                             ylabel, 
-                            load_file_name,
                             save_plot=False, 
-                            plot_file_name="flat_histogram.png"):
+                            file_path="flat_histogram_multi.png"):
     
     plt.figure(figsize=(8, 4))
 
-    for sticking_prob in sticking_prob_array:
-        sticking_prob_str = str(sticking_prob).replace(".", "_")
-        data = load_data(load_file_name + str(sticking_prob_str) + "_sp.npy")
+    for parameter, data in zip(parameter_array, array_of_arrays):
         num_runs = data.shape[0]
         sum_grid = np.sum(data, axis=0).reshape([-1]) / num_runs
         hist, bins = np.histogram(sum_grid, np.linspace(0,1,20))
-        plt.bar(bins[:-1], hist, width=0.05, alpha=0.5, label=str(sticking_prob))
+        plt.bar(bins[:-1], hist, width=0.05, alpha=0.5, label=str(parameter))
 
     #plt.title(title)
     plt.xlabel(xlabel, fontsize=16)
@@ -223,10 +213,60 @@ def flat_histogram_multiple(sticking_prob_array,
     plt.tight_layout() 
 
     if save_plot:
-        os.makedirs(os.path.join("results", "monte_carlo"), exist_ok=True)
-        save_location = os.path.join("results", "monte_carlo")
-        plt.savefig(save_location)
+        plt.savefig(file_path)
     
+    plt.show()
+
+def plot_single_y_slice_density(data, save_plot=False, file_path="y_slice_density.png"):
+    num_runs, _, grid_size = data.shape
+
+    sum_grid = np.sum(data, axis=0)
+    ys = np.linspace(0, 1, grid_size)
+    xs = ys.copy()
+    center = xs[grid_size // 2]
+    xdiff = np.abs(xs - center)
+
+    mean_diff_from_center = np.sum(xdiff[None, :] * sum_grid, axis=1) / np.sum(sum_grid, axis=1)
+
+    plt.figure(figsize=(4, 8))
+    plt.plot(mean_diff_from_center, ys, label='Mean Difference from Center', color='blue')
+    plt.xlabel('Mean Difference from Center', fontsize=16)
+    plt.ylabel('y (cross section)', fontsize=16)
+    plt.legend()
+
+    plt.tight_layout()
+
+    if save_plot:
+        plt.savefig(file_path)
+
+    plt.show()
+
+def plot_y_slice_density_multiple(parameter_array, array_of_arrays, save_plot=False, file_path="y_slice_density_multi.png"):
+    plt.figure(figsize=(4, 8))
+    cmap = get_cmap('magma') 
+
+    for parameter, data in zip(parameter_array, array_of_arrays):
+        num_runs, _, grid_size = data.shape
+
+        sum_grid = np.sum(data, axis=0)
+        ys = np.linspace(0, 1, grid_size)
+        xs = ys.copy()
+        center = xs[grid_size // 2]
+        xdiff = np.abs(xs - center)
+
+        mean_diff_from_center = np.sum(xdiff[None, :] * sum_grid, axis=1) / np.sum(sum_grid, axis=1)
+
+        plt.plot(mean_diff_from_center, ys, label=str(parameter), color=cmap(parameter/max(parameter_array)))
+
+    plt.xlabel('Mean Difference from Center', fontsize=16)
+    plt.ylabel('y (cross section)', fontsize=16)
+    plt.legend()
+
+    plt.tight_layout()
+
+    if save_plot:
+        plt.savefig(file_path)
+
     plt.show()
 
 

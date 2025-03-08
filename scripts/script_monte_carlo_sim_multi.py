@@ -46,8 +46,8 @@ def run_multiple_sticking_probs(grid_size, sticking_prob_array, num_simulations)
 
 if __name__ == "__main__":
     grid_size = 101
-    sticking_prob_array = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
+    sticking_prob_array = [0.1,0.5] #[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
 
-    num_simulations = 20
+    num_simulations = 500
 
     run_multiple_sticking_probs(grid_size, sticking_prob_array, num_simulations)
