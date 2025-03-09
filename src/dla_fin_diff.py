@@ -97,8 +97,9 @@ def dla_growth(eta, omega, initial_condition, growth_steps=1000, diffusion_toler
     c[0], sor_iter,_ = SOR_top_down(c[0], omega, tolerance=diffusion_tolerance, mask=1-g[0])
     total_sor_iter = sor_iter
     for t in range(0, growth_steps-1):
-        # if verbose and (t%(growth_steps//100)==0):
-        #    print('.', end='', flush=True)
+        
+        if verbose and (t%(growth_steps//100)==0):
+            print('.', end='', flush=True)
         
         c[t+1], sor_iter, sor_tol = SOR_top_down(c[t].copy(), omega, tolerance=diffusion_tolerance, mask=1-g[t], adaptive=adaptive_SOR)
         total_sor_iter += sor_iter
