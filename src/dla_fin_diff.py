@@ -1,6 +1,7 @@
 import numpy as np
-from finite_difference import *
-from utils import *
+
+from src.finite_difference import *
+from src.utils import *
 
 def neighbors_grid(g):
     """

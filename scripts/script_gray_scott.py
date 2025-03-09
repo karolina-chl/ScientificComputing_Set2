@@ -1,3 +1,5 @@
+import os
+
 from src.gray_scott import init_grids, solve_gray_scott, plot_animation, last_frame_gray_scott_save
     
 def animation(): 
@@ -28,10 +30,9 @@ def script_gray_scott(total_time, noise_boundry, U_supply, k):
 
     chemical_U, chemical_V = init_grids(total_time, time_step_size, n_steps)
     solve_gray_scott(chemical_U, chemical_V, total_time, time_step_size, x_length, n_steps, diffusion_coefficient_u, diffusion_coefficient_v, U_supply, k, noise_boundry)
-    last_frame_gray_scott_save(chemical_V, f"results/gray_scott/ {total_time}, {noise_boundry}, f_{U_supply}, k_{k}.png")
+    last_frame_gray_scott_save(chemical_V, os.path.join("results", "gray_scott", f"{total_time}, {noise_boundry}, f_{U_supply}, k_{k}.png"))
 
-if __name__ == "__main__":
-
+def main():
     animation()
 
     for time in (1000,2000,5000):
@@ -44,3 +45,7 @@ if __name__ == "__main__":
     noise = [0.001, 0.01, 0.02, 0.1]     
     for noise_boundry in (noise):
         script_gray_scott(5000, noise_boundry, 0.035, 0.060)
+
+if __name__ == "__main__":
+    main()
+    
