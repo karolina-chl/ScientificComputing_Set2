@@ -1,5 +1,4 @@
 import numpy as np
-
 from src.finite_difference import *
 from src.utils import *
 
