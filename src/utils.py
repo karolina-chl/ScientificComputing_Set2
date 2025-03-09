@@ -21,11 +21,13 @@ def plot_grid(c, growth=None, file=None, title='', make_cbar=True, fig=None, ax=
         cbar.set_label("Concentration")
     if growth is not None:      
         heatmap = ax.imshow(growth, alpha=growth, cmap='tab20b',  extent=[0, 1, 0, 1])
+    ax.set_xticklabels('')
+    ax.set_yticklabels('')
+    ax.set_xlabel("X", fontsize=24)
+    ax.set_ylabel("Y", fontsize=24)
+    ax.set_title(title, fontsize=24)
 
-    ax.set_xlabel("X", fontsize=16)
-    ax.set_ylabel("Y", fontsize=16)
-    ax.set_title(title)
-
+    fig.tight_layout()
     
     if file is not None:
         plt.savefig(file, dpi=600)
