@@ -44,10 +44,14 @@ def run_multiple_sticking_probs(grid_size, sticking_prob_array, num_simulations)
         save_names = generate_save_names(sticking_prob_str)
         scrpt_monte_carlo_multiple_simulations(grid_size, sticking_prob, num_simulations, save_names)
 
-if __name__ == "__main__":
+def main():
     grid_size = 101
-    sticking_prob_array = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
-
+    sticking_prob = 1.0
     num_simulations = 20
+    sticking_prob_str = str(sticking_prob).replace(".", "_")
+    save_names = generate_save_names(sticking_prob_str)
 
-    run_multiple_sticking_probs(grid_size, sticking_prob_array, num_simulations)
+    scrpt_monte_carlo_multiple_simulations(grid_size, sticking_prob, num_simulations, save_names)
+
+if __name__ == "__main__":
+    main()

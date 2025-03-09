@@ -20,8 +20,22 @@ dependencies = [
     "scipy",
     "numba",
     "taichi",
-    "cupy"
 ]
 
 [project.urls]
 Home = "https://github.com/karolina-chl/ScientificComputing_Set2"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
+[project.scripts]
+gray_scott = "scripts.script_gray_scott:main"
+single_run_dla = "scripts.single_run_dla:main"
+optimal_omega = "scripts.optimal_omega:main"
+many_runs_hist = "scripts.many_runs_hist:main"
+monte_carlo_multi = "scripts.script_monte_carlo_sim_multi:main"
+monte_carlo_plot_multi = "scripts.script_monte_carlo_plot_multi:main"
+monte_carlo = "scripts.script_monte_carlo_single:main"
+compare_DLA_MC = "scripts.script_compare_DLA:main"

@@ -1,12 +1,11 @@
-
-import sys
-sys.path.append('../src')
-
-from dla_fin_diff import *
-from utils import *
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+
+from src.dla_fin_diff import *
+from src.utils import *
 
 def many_runs_experiment(num_runs = 10, eta =2, omega = 1.85):
     """
@@ -32,7 +31,7 @@ def many_runs_experiment(num_runs = 10, eta =2, omega = 1.85):
         print(total_sor_iter)
         final_grids[run] = g[num_iter]
         
-    np.save('../data/many_runs_eta_{}'.format(eta), final_grids)
+    np.save(os.path.join('data', 'many_runs_eta_{}'.format(eta)), final_grids)
     
     
 
@@ -50,9 +49,6 @@ def plot_many_runs_experiment(file, skip_ends=1):
         mean number of cells in each row plot
     """  
     grids = np.load(file)
-    mean_abs_diff(grids)
-    plt.show()
-    # plot_grid(np.mean(grids, axis=0), file=file.replace('data', 'results/diffusion_limited_aggregation').replace('npy', 'png'), title=r'$\eta = 2$')
     num_runs, _, grid_size = grids.shape
     sum_grid = np.sum(grids, axis=0)
     ys = np.linspace(0,1,grid_size)
@@ -67,38 +63,28 @@ def plot_many_runs_experiment(file, skip_ends=1):
     plt.show()
     
     num_cells_per_cross = np.sum(sum_grid, axis=1) / num_runs
-    # plt.plot(ys, xdiff)
-    # mabs = np.sum(xdiff[None, :]*sum_grid/num_runs, axis=1) / num_cells_per_cross[:,None]
-    # plt.imshow(xdiff[None, :]*sum_grid)
-    # mean = np.sum(xs[None, :]*sum_grid/np.sum(sum_grid, axis=1)[:,None], axis=1)
-    # print(mean)
-    # print(msqd)
-    # plt.plot(ys[skip_ends:-skip_ends], mabs[skip_ends:-skip_ends], label='$|x-<x>|$')
-    # plt.plot(ys[skip_ends:-skip_ends], mean[skip_ends:-skip_ends], label='<x>')
-    # plt.legend()
-    # plt.show()
     mabs = mean_abs_diff(grids)
     plt.plot(ys[:-skip_ends], num_cells_per_cross[:-skip_ends], label='$N_y$')
     plt.plot(ys[:-skip_ends], mabs[:-skip_ends], label=r'$\langle|x-x_c|\rangle$')
     plt.legend()
     plt.show()
     
-    
-    
 
+def main():
+    #many_runs_experiment(100, 1, 1.8)
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_1.npy'))
     
     
-        
-if __name__ == '__main__':
-    # many_runs_experiment(100, 1, 1.8)
-    # plot_many_runs_experiment('../data/many_runs_eta_1.npy')
+    # flat_histogram(np.load(os.path.join('data', 'many_runs_eta_4.0.npy')), 
+    #                'Flat histogram of final seed growth states', 
+    #                'Cell Occupation Probability', 
+    #                'Frequency of grid cells', 
+    #                save_plot=True, 
+    #                file_path=os.path.join('results', 'diffusion_limited_aggregation', 'histogram_many_runs_eta_1.png'))
     
     
-    # flat_histogram('../data/many_runs_eta_4.npy')
-    
-    
-    # many_runs_experiment(100, 0.5, 1.8)
-    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
+    #many_runs_experiment(100, 0.5, 1.8)
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_0.5.npy'))
     
     
     #run the experiments from the shell file
@@ -106,19 +92,32 @@ if __name__ == '__main__':
     # many_runs_experiment(1000,eta, 1.85)
     
     # visualize the data
-    # plot_many_runs_experiment('../data/many_runs_eta_0.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_0.5.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_1.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_2.0.npy')
-    # plot_many_runs_experiment('../data/many_runs_eta_4.0.npy')
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_0.0.npy'))
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_0.125.npy'))
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_0.5.npy'))
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_1.0.npy'))
+    # plot_many_runs_experiment(os.path.join('data', 'many_runs_eta_2.0.npy'))
     
     
     #analyze data of the many runs experiment
     etas = [0., 0.125, 0.5, 1., 2., 4.]
-    plot_cross_section_and_deviation_multiple(etas, 
-                                              load_file_name='../data/many_runs_eta_', 
-                                              comma_separator='.', 
-                                              load_file_ending='.npy', 
-                                              parameter_name=r'$\eta$', 
+
+    array_of_arrays = [np.load(os.path.join('data', 'many_runs_eta_{}.npy'.format(eta))) for eta in etas]   
+
+    plot_cross_section_and_deviation_multiple(etas,
+                                              array_of_arrays,
+                                              parameter_name=r'$\eta$',
                                               save_plot=True, 
-                                              plot_file='../results/diffusion_limited_aggregation/cross_section_plot.png')
+                                              file_path=os.path.join('results', 'diffusion_limited_aggregation', 'cross_section_and_deviation_all.png'))
+        
+if __name__ == '__main__':
+    
+    
+    
+    #run the experiments from the shell file with eta given as shell argument
+    if len(sys.argv) >1:
+        eta = float(sys.argv[1])
+        many_runs_experiment(1000,eta, 1.85)
+    #regular plotting of results
+    else:
+        main()

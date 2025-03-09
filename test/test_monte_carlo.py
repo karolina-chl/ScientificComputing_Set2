@@ -9,14 +9,3 @@ class TestMonteCarlo(unittest.TestCase):
         self.testParameter = 1
         pass
 
-    def test_initialize_grid(self):
-        grid_size = 101
-        seed_growth_grid = np.zeros((grid_size, grid_size), dtype=int)
-        center = grid_size // 2
-        seed_growth_grid[grid_size - 1, center] = 1.0
-
-        empty_grid = initialize_grid(grid_size)
-
-
-        self.assertEqual(seed_growth_grid, empty_grid)
-

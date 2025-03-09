@@ -290,6 +290,10 @@ def monte_carlo_sim(grid_size, sticking_prob, max_walkers=100000):
 
             walk_count += 1
 
+    print("Number of successful walks: ", successful_walks)
+    print("Number of total walks: ", walk_count)
+    print("Success rate: ", successful_walks / walk_count)
+
     return results, walk_count, successful_walks
 
 def monte_carlo_sim_final_state_only(grid_size, sticking_prob, iterations_to_save = 25000):
