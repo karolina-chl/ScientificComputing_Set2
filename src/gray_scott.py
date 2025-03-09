@@ -190,4 +190,5 @@ def last_frame_gray_scott_save(c, filename):
     cbar.set_label("Concentration", fontsize = 35)
     plt.savefig(filename, dpi=300)
     plt.close(fig)
+    return last_frame
 
