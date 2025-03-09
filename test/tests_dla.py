@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 from numba import njit
 import os 
-
 from src.dla_fin_diff import neighbors_grid, set_numba_seed, grow_g, dla_growth
 
 class TestDLAGrowth(unittest.TestCase):
@@ -40,7 +39,7 @@ class TestDLAGrowth(unittest.TestCase):
         """Test if the growth process stops when the top row is reached."""
         initial_condition = np.zeros((self.grid_size, self.grid_size), dtype=int)
         initial_condition[-2, 2] = 1  # Start one row above the bottom
-        gs = 50
+        gs = 500
         
         g, c, t, total_sor_iter = dla_growth(
             eta=1, omega=1.5, initial_condition=initial_condition, growth_steps=gs  # Increased steps
